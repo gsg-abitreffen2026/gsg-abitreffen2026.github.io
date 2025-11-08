@@ -57,31 +57,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const galerieSection = document.getElementById("galerie");
   const galerieLoginBox = document.getElementById("galerie-login-box");
   const galerieLoginMitte = document.getElementById("galerie-login-mitte");
-  function showOnlyNewsletter() {
-    newsletterBox?.classList.remove("hidden");
-    galerieLoginBox?.classList.add("hidden");
-    galerieLoginMitte?.classList.add("hidden");
-    galerieSection?.classList.add("hidden");
-  }
-  function showOnlyGalerieLogin() {
-    newsletterBox?.classList.add("hidden");
-    galerieLoginBox?.classList.remove("hidden");
-    galerieLoginMitte?.classList.remove("hidden");
-    galerieSection?.classList.add("hidden");
-  }
   function showGalerie() {
     newsletterBox?.classList.add("hidden");
     galerieLoginBox?.classList.add("hidden");
     galerieLoginMitte?.classList.add("hidden");
     galerieSection?.classList.remove("hidden");
   }
+  function showLogin(hasNewsletter) {
+    newsletterBox?.classList.toggle("hidden", !!hasNewsletter);
+    galerieLoginBox?.classList.remove("hidden");
+    galerieLoginMitte?.classList.remove("hidden");
+    galerieSection?.classList.add("hidden");
+  }
   function checkLoginNewsletterStatus() {
     if (localStorage.getItem("loggedIn") === "true") {
       showGalerie();
-    } else if (localStorage.getItem("newsletterVorname")) {
-      showOnlyGalerieLogin();
     } else {
-      showOnlyNewsletter();
+      showLogin(localStorage.getItem("newsletterVorname"));
     }
   }
   checkLoginNewsletterStatus();
