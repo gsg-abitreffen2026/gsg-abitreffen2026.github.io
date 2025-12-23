@@ -425,7 +425,7 @@
     const res = await fetch("https://gsg-proxy.vercel.app/api/proxy", {
       method: "POST",
       body: new URLSearchParams({
-        action: "newsletter",
+        action: "newsletter_admin",
         passwort: ADMIN_PASSWORD,
         subject,
         text: html
