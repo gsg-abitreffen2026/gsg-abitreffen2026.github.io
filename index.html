@@ -94,13 +94,25 @@
         <p id="loginMessageMitte"></p>
       </section>
 
+      <section id="upload-box" class="content-box hidden">
+        <h2>Galerie-Upload</h2>
+        <p>Hier kannst du Bilder direkt in die Galerie hochladen.</p>
+        <form id="upload-form">
+          <input type="file" id="upload-file" accept="image/jpeg,image/png,image/heic,image/heif" required />
+          <p class="form-hint">Erlaubte Formate: JPG, PNG, HEIC/HEIF - Max 5 MB</p>
+          <button type="submit" class="button">Bild hochladen</button>
+        </form>
+        <p id="upload-status" class="form-status"></p>
+      </section>
+
       <section id="galerie" class="content-box hidden">
         <h2>Galerie</h2>
         <div class="gallery-wrapper">
-          <img id="gallery-image" src="bilder/bild1.jpg" alt="Galeriebild" loading="lazy" decoding="async" />
+          <img id="gallery-image" src="" alt="Galeriebild" class="hidden" loading="lazy" decoding="async" />
           <button id="prevBtn" class="gallery-button">&#8592;</button>
           <button id="nextBtn" class="gallery-button">&#8594;</button>
         </div>
+        <p id="gallery-status" class="form-status"></p>
       </section>
 
       <section id="kontakt" class="content-box kontakt-collapsible collapsed">

@@ -162,6 +162,7 @@
             <th>Nachname</th>
             <th>E-Mail</th>
             <th>Zugangscode</th>
+            <th>Upload</th>
             <th>Löschen</th>
           </tr>
         </thead>
@@ -254,11 +255,18 @@
 
       galerie.forEach(row => {
         const tr = document.createElement("tr");
+        const uploadValue = (row.upload || "").toLowerCase() === "ja" ? "ja" : "nein";
         tr.innerHTML = `
           <td>${row.vorname}</td>
           <td>${row.nachname}</td>
           <td>${row.email}</td>
           <td>${row.code}</td>
+          <td>
+            <select onchange="setUpload('${row.email}', this.value)">
+              <option value="ja" ${uploadValue === "ja" ? "selected" : ""}>Ja</option>
+              <option value="nein" ${uploadValue === "nein" ? "selected" : ""}>Nein</option>
+            </select>
+          </td>
           <td><button onclick="loeschen('${row.email}')">Löschen</button></td>
         `;
         t2.appendChild(tr);
@@ -311,6 +319,24 @@
 
     const result = await res.text();
     alert(result);
+    loadAdminData();
+  }
+
+  async function setUpload(email, value) {
+    const res = await fetch("https://gsg-proxy.vercel.app/api/proxy", {
+      method: "POST",
+      body: new URLSearchParams({
+        action: "upload_set",
+        passwort: ADMIN_PASSWORD,
+        email,
+        value
+      })
+    });
+
+    const result = await res.text();
+    if (result && result !== "ok") {
+      alert(result);
+    }
     loadAdminData();
   }
 

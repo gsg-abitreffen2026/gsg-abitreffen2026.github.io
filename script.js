@@ -64,6 +64,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const verbindlichEmail = document.getElementById("verbindlich-email");
   const verbindlichHoney = document.getElementById("verbindlich-honey");
   const verbindlichMessage = document.getElementById("verbindlich-message");
+  const uploadBox = document.getElementById("upload-box");
+  const uploadForm = document.getElementById("upload-form");
+  const uploadFile = document.getElementById("upload-file");
+  const uploadStatus = document.getElementById("upload-status");
+  const galleryStatus = document.getElementById("gallery-status");
   function showGalerie() {
     newsletterBox?.classList.add("hidden");
     galerieLoginBox?.classList.add("hidden");
@@ -78,8 +83,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   function updateVerbindlichStatus() {
     const hasNewsletter = !!localStorage.getItem("newsletterVorname") || localStorage.getItem("loggedIn") === "true";
-    verbindlichSection?.classList.toggle("hidden", !hasNewsletter);
-    if (!hasNewsletter) return;
+    const alreadyCommitted = localStorage.getItem("verbindlichAngemeldet") === "true";
+    const shouldShow = hasNewsletter && !alreadyCommitted;
+
+    verbindlichSection?.classList.toggle("hidden", !shouldShow);
+    if (!shouldShow) return;
 
     const storedVorname = localStorage.getItem("newsletterVorname") || "";
     const storedNachname = localStorage.getItem("newsletterNachname") || "";
@@ -89,13 +97,20 @@ document.addEventListener("DOMContentLoaded", () => {
     if (verbindlichNachname && !verbindlichNachname.value) verbindlichNachname.value = storedNachname;
     if (verbindlichEmail && !verbindlichEmail.value) verbindlichEmail.value = storedEmail;
   }
+  function updateUploadStatus() {
+    const loggedIn = localStorage.getItem("loggedIn") === "true";
+    const uploadAllowed = localStorage.getItem("uploadAllowed") === "true";
+    uploadBox?.classList.toggle("hidden", !(loggedIn && uploadAllowed));
+  }
   function checkLoginNewsletterStatus() {
     if (localStorage.getItem("loggedIn") === "true") {
       showGalerie();
+      loadGalleryList();
     } else {
       showLogin(localStorage.getItem("newsletterVorname"));
     }
     updateVerbindlichStatus();
+    updateUploadStatus();
   }
   checkLoginNewsletterStatus();
   window.addEventListener("resize", checkLoginNewsletterStatus);
@@ -204,10 +219,14 @@ document.addEventListener("DOMContentLoaded", () => {
       .then(data => {
         if (data.result === "success" || data.success === true) {
           success = true;
+          localStorage.setItem("verbindlichAngemeldet", "true");
           if (verbindlichMessage) {
             verbindlichMessage.textContent = "Danke! Deine verbindliche Anmeldung ist eingegangen.";
             verbindlichMessage.style.color = "green";
           }
+          setTimeout(() => {
+            updateVerbindlichStatus();
+          }, 1200);
         } else if (data.result === "ignored") {
           console.log("Spam-Schutz ausgelöst");
         } else {
@@ -228,6 +247,110 @@ document.addEventListener("DOMContentLoaded", () => {
       .finally(() => {
         if (submitBtn && !success) submitBtn.disabled = false;
       });
+    });
+  }
+
+
+  // ===== Upload (Galerie) =====
+  const MAX_UPLOAD_SIZE = 5 * 1024 * 1024;
+  const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/heic", "image/heif", "image/jpg"];
+  const ALLOWED_EXT = [".jpg", ".jpeg", ".png", ".heic", ".heif"];
+
+  function isAllowedImage(file) {
+    if (!file) return false;
+    const name = (file.name || "").toLowerCase();
+    const byExt = ALLOWED_EXT.some(ext => name.endsWith(ext));
+    const byType = ALLOWED_TYPES.includes(file.type);
+    return byType || (file.type === "" && byExt);
+  }
+
+  function setUploadMessage(text, color) {
+    if (!uploadStatus) return;
+    uploadStatus.textContent = text;
+    uploadStatus.style.color = color || "";
+  }
+
+  if (uploadForm) {
+    uploadForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const submitBtn = uploadForm.querySelector("button[type='submit']");
+      if (submitBtn) submitBtn.disabled = true;
+
+      const file = uploadFile?.files?.[0];
+      if (!file) {
+        setUploadMessage("Bitte wähle eine Datei aus.", "red");
+        if (submitBtn) submitBtn.disabled = false;
+        return;
+      }
+      if (!isAllowedImage(file)) {
+        setUploadMessage("Dateiformat nicht erlaubt. Bitte JPG, PNG oder HEIC/HEIF verwenden.", "red");
+        if (submitBtn) submitBtn.disabled = false;
+        return;
+      }
+      if (file.size > MAX_UPLOAD_SIZE) {
+        setUploadMessage("Datei zu groß. Maximal 5 MB.", "red");
+        if (submitBtn) submitBtn.disabled = false;
+        return;
+      }
+
+      const loginEmail = localStorage.getItem("loginEmail") || "";
+      const loginCode = localStorage.getItem("loginCode") || "";
+      if (!loginEmail || !loginCode) {
+        setUploadMessage("Bitte erneut in die Galerie einloggen.", "red");
+        if (submitBtn) submitBtn.disabled = false;
+        return;
+      }
+
+      setUploadMessage("Upload läuft...", "#0073b1");
+
+      const reader = new FileReader();
+      reader.onload = function () {
+        const result = String(reader.result || "");
+        const base64 = result.includes(",") ? result.split(",")[1] : result;
+
+        fetch("https://gsg-proxy.vercel.app/api/proxy", {
+          method: "POST",
+          body: new URLSearchParams({
+            action: "upload_image",
+            email: loginEmail,
+            code: loginCode,
+            filename: file.name,
+            mimeType: file.type || "",
+            data: base64
+          })
+        })
+        .then(async response => {
+          const text = await response.text();
+          try { return JSON.parse(text); }
+          catch (err) {
+            setUploadMessage("Fehlerhafte Serverantwort!", "red");
+            throw err;
+          }
+        })
+        .then(data => {
+          if (data.result === "success" || data.success === true) {
+            setUploadMessage("Danke! Bild wurde hochgeladen.", "green");
+            uploadForm.reset();
+            loadGalleryList(true);
+          } else {
+            setUploadMessage(data.message || "Upload fehlgeschlagen.", "red");
+          }
+        })
+        .catch(err => {
+          console.error("Upload-Fehler:", err);
+          setUploadMessage("Upload fehlgeschlagen.", "red");
+        })
+        .finally(() => {
+          if (submitBtn) submitBtn.disabled = false;
+        });
+      };
+
+      reader.onerror = function () {
+        setUploadMessage("Datei konnte nicht gelesen werden.", "red");
+        if (submitBtn) submitBtn.disabled = false;
+      };
+
+      reader.readAsDataURL(file);
     });
   }
 
@@ -254,6 +377,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (data.result === "success") {
           localStorage.setItem("loggedIn", "true");
           localStorage.setItem("subscriberName", data.name || "");
+          localStorage.setItem("uploadAllowed", data.upload ? "true" : "false");
+          localStorage.setItem("loginEmail", email);
+          localStorage.setItem("loginCode", code);
           if (msg) {
             msg.textContent = "Erfolgreich eingeloggt.";
             msg.style.color = "green";
@@ -299,32 +425,83 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // ===== Galerie-Slideshow =====
-  const images = [
-    "bilder/bild1.jpg",
-    "bilder/bild2.jpg",
-    "bilder/bild3.jpg",
-    "bilder/bild4.jpg",
-    "bilder/bild5.jpg"
-  ];
+  // ===== Galerie (dynamisch) =====
+  let galleryImages = [];
   let currentIndex = 0;
+  let galleryLoaded = false;
   const galleryImage = document.getElementById("gallery-image");
   const prevBtn = document.getElementById("prevBtn");
   const nextBtn = document.getElementById("nextBtn");
-  function updateImage() {
-    if (galleryImage) galleryImage.src = images[currentIndex];
+
+  function showGalleryMessage(message) {
+    galleryImage?.classList.add("hidden");
+    prevBtn?.classList.add("hidden");
+    nextBtn?.classList.add("hidden");
+    if (galleryStatus) galleryStatus.textContent = message;
   }
-  updateImage();
+
+  function renderGallery() {
+    if (!galleryImage) return;
+    if (!galleryImages.length) {
+      showGalleryMessage("Noch keine Bilder in der Galerie.");
+      return;
+    }
+    galleryImage.classList.remove("hidden");
+    prevBtn?.classList.remove("hidden");
+    nextBtn?.classList.remove("hidden");
+    if (galleryStatus) galleryStatus.textContent = "";
+
+    currentIndex = ((currentIndex % galleryImages.length) + galleryImages.length) % galleryImages.length;
+    galleryImage.src = galleryImages[currentIndex];
+  }
+
+  function setGalleryImages(list) {
+    galleryImages = Array.isArray(list) ? list.filter(Boolean) : [];
+    currentIndex = 0;
+    renderGallery();
+  }
+
+  async function loadGalleryList(force = false) {
+    if (galleryLoaded && !force) return;
+    if (galleryStatus) galleryStatus.textContent = "Galerie wird geladen...";
+    try {
+      const res = await fetch("https://gsg-proxy.vercel.app/api/proxy", {
+        method: "POST",
+        body: new URLSearchParams({ action: "gallery_list" })
+      });
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (err) {
+        showGalleryMessage("Fehlerhafte Serverantwort!");
+        throw err;
+      }
+
+      if (data.result === "success" || data.success === true) {
+        galleryLoaded = true;
+        setGalleryImages(data.images || []);
+      } else {
+        showGalleryMessage(data.message || "Galerie konnte nicht geladen werden.");
+      }
+    } catch (error) {
+      console.error("Galerie-Fehler:", error);
+      showGalleryMessage("Galerie konnte nicht geladen werden.");
+    }
+  }
+
   prevBtn?.addEventListener("click", () => {
-    currentIndex = (currentIndex - 1 + images.length) % images.length;
-    updateImage();
+    if (!galleryImages.length) return;
+    currentIndex = (currentIndex - 1 + galleryImages.length) % galleryImages.length;
+    renderGallery();
   });
   nextBtn?.addEventListener("click", () => {
-    currentIndex = (currentIndex + 1) % images.length;
-    updateImage();
+    if (!galleryImages.length) return;
+    currentIndex = (currentIndex + 1) % galleryImages.length;
+    renderGallery();
   });
   galleryImage?.addEventListener("error", () => {
-    console.error(`Bild nicht gefunden: ${galleryImage.src}`);
+    console.error(`Bild nicht gefunden: ${galleryImage?.src}`);
   });
 
   // ===== Kalender-Links (.ics + Google) =====
