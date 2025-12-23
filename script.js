@@ -57,6 +57,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const galerieSection = document.getElementById("galerie");
   const galerieLoginBox = document.getElementById("galerie-login-box");
   const galerieLoginMitte = document.getElementById("galerie-login-mitte");
+  const verbindlichSection = document.getElementById("verbindlich");
+  const verbindlichForm = document.getElementById("verbindlich-form");
+  const verbindlichVorname = document.getElementById("verbindlich-vorname");
+  const verbindlichNachname = document.getElementById("verbindlich-nachname");
+  const verbindlichEmail = document.getElementById("verbindlich-email");
+  const verbindlichHoney = document.getElementById("verbindlich-honey");
+  const verbindlichMessage = document.getElementById("verbindlich-message");
   function showGalerie() {
     newsletterBox?.classList.add("hidden");
     galerieLoginBox?.classList.add("hidden");
@@ -69,12 +76,26 @@ document.addEventListener("DOMContentLoaded", () => {
     galerieLoginMitte?.classList.remove("hidden");
     galerieSection?.classList.add("hidden");
   }
+  function updateVerbindlichStatus() {
+    const hasNewsletter = !!localStorage.getItem("newsletterVorname") || localStorage.getItem("loggedIn") === "true";
+    verbindlichSection?.classList.toggle("hidden", !hasNewsletter);
+    if (!hasNewsletter) return;
+
+    const storedVorname = localStorage.getItem("newsletterVorname") || "";
+    const storedNachname = localStorage.getItem("newsletterNachname") || "";
+    const storedEmail = localStorage.getItem("newsletterEmail") || "";
+
+    if (verbindlichVorname && !verbindlichVorname.value) verbindlichVorname.value = storedVorname;
+    if (verbindlichNachname && !verbindlichNachname.value) verbindlichNachname.value = storedNachname;
+    if (verbindlichEmail && !verbindlichEmail.value) verbindlichEmail.value = storedEmail;
+  }
   function checkLoginNewsletterStatus() {
     if (localStorage.getItem("loggedIn") === "true") {
       showGalerie();
     } else {
       showLogin(localStorage.getItem("newsletterVorname"));
     }
+    updateVerbindlichStatus();
   }
   checkLoginNewsletterStatus();
   window.addEventListener("resize", checkLoginNewsletterStatus);
@@ -118,6 +139,8 @@ document.addEventListener("DOMContentLoaded", () => {
       .then(data => {
         if (data.result === "success") {
           localStorage.setItem("newsletterVorname", vorname);
+          localStorage.setItem("newsletterNachname", nachname);
+          localStorage.setItem("newsletterEmail", email);
           alert(`Danke für deine Anmeldung, ${vorname || "Freund/in"}! Bitte prüfe, ob die Bestätigungsmail angekommen ist (auch im Spam-Ordner). Nur so kannst du später auch die News bekommen!`);
           newsletterForm.reset();
           checkLoginNewsletterStatus();
@@ -134,6 +157,76 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .finally(() => {
         if (submitBtn) submitBtn.disabled = false;
+      });
+    });
+  }
+
+  // ===== Verbindliche Anmeldung =====
+  if (verbindlichForm) {
+    verbindlichForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const submitBtn = verbindlichForm.querySelector("button[type='submit']");
+      if (submitBtn) submitBtn.disabled = true;
+
+      const vorname = verbindlichVorname?.value.trim() || "";
+      const nachname = verbindlichNachname?.value.trim() || "";
+      const email = verbindlichEmail?.value.trim() || "";
+      const honey = verbindlichHoney?.value || "";
+
+      if (honey) {
+        if (submitBtn) submitBtn.disabled = false;
+        return;
+      }
+
+      let success = false;
+
+      fetch("https://gsg-proxy.vercel.app/api/proxy", {
+        method: "POST",
+        body: new URLSearchParams({
+          action: "verbindlich",
+          email,
+          vorname,
+          nachname,
+          _honey: honey
+        })
+      })
+      .then(async response => {
+        const text = await response.text();
+        try { return JSON.parse(text); }
+        catch (err) {
+          if (verbindlichMessage) {
+            verbindlichMessage.textContent = "Fehlerhafte Serverantwort!";
+            verbindlichMessage.style.color = "red";
+          }
+          throw err;
+        }
+      })
+      .then(data => {
+        if (data.result === "success" || data.success === true) {
+          success = true;
+          if (verbindlichMessage) {
+            verbindlichMessage.textContent = "Danke! Deine verbindliche Anmeldung ist eingegangen.";
+            verbindlichMessage.style.color = "green";
+          }
+        } else if (data.result === "ignored") {
+          console.log("Spam-Schutz ausgelöst");
+        } else {
+          if (verbindlichMessage) {
+            verbindlichMessage.textContent = "Fehler bei der Anmeldung. Bitte versuche es später.";
+            verbindlichMessage.style.color = "red";
+          }
+          console.error(data.message || "Unbekannter Fehler");
+        }
+      })
+      .catch(error => {
+        if (verbindlichMessage) {
+          verbindlichMessage.textContent = "Es ist ein Fehler aufgetreten.";
+          verbindlichMessage.style.color = "red";
+        }
+        console.error("Fetch-Fehler:", error);
+      })
+      .finally(() => {
+        if (submitBtn && !success) submitBtn.disabled = false;
       });
     });
   }
