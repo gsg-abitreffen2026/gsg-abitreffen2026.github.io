@@ -69,6 +69,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const uploadFile = document.getElementById("upload-file");
   const uploadStatus = document.getElementById("upload-status");
   const galleryStatus = document.getElementById("gallery-status");
+  let galleryImages = [];
+  let currentIndex = 0;
+  let galleryLoaded = false;
+  let galleryImage = null;
+  let prevBtn = null;
+  let nextBtn = null;
   function showGalerie() {
     newsletterBox?.classList.add("hidden");
     galerieLoginBox?.classList.add("hidden");
@@ -112,9 +118,6 @@ document.addEventListener("DOMContentLoaded", () => {
     updateVerbindlichStatus();
     updateUploadStatus();
   }
-  checkLoginNewsletterStatus();
-  window.addEventListener("resize", checkLoginNewsletterStatus);
-
   // ===== Newsletter-Formular (robust, ohne Dopplung!) =====
   const newsletterForm = document.getElementById("newsletter-form");
   if (newsletterForm) {
@@ -323,7 +326,8 @@ document.addEventListener("DOMContentLoaded", () => {
           const text = await response.text();
           try { return JSON.parse(text); }
           catch (err) {
-            setUploadMessage("Fehlerhafte Serverantwort!", "red");
+            setUploadMessage("Upload fehlgeschlagen (Serverantwort ist kein JSON).", "red");
+            console.error("Upload-Response:", text.slice(0, 200));
             throw err;
           }
         })
@@ -426,12 +430,12 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ===== Galerie (dynamisch) =====
-  let galleryImages = [];
-  let currentIndex = 0;
-  let galleryLoaded = false;
-  const galleryImage = document.getElementById("gallery-image");
-  const prevBtn = document.getElementById("prevBtn");
-  const nextBtn = document.getElementById("nextBtn");
+  galleryImages = [];
+  currentIndex = 0;
+  galleryLoaded = false;
+  galleryImage = document.getElementById("gallery-image");
+  prevBtn = document.getElementById("prevBtn");
+  nextBtn = document.getElementById("nextBtn");
 
   function showGalleryMessage(message) {
     galleryImage?.classList.add("hidden");
@@ -475,6 +479,7 @@ document.addEventListener("DOMContentLoaded", () => {
         data = JSON.parse(text);
       } catch (err) {
         showGalleryMessage("Fehlerhafte Serverantwort!");
+        console.error("Galerie-Response:", text.slice(0, 200));
         throw err;
       }
 
@@ -501,7 +506,9 @@ document.addEventListener("DOMContentLoaded", () => {
     renderGallery();
   });
   galleryImage?.addEventListener("error", () => {
-    console.error(`Bild nicht gefunden: ${galleryImage?.src}`);
+    const src = galleryImage?.src || "";
+    if (!src || src === window.location.href) return;
+    console.error(`Bild nicht gefunden: ${src}`);
   });
 
   // ===== Kalender-Links (.ics + Google) =====
@@ -557,4 +564,7 @@ document.addEventListener("DOMContentLoaded", () => {
       gcalLink.rel = 'noopener noreferrer';
     }
   })();
+
+  checkLoginNewsletterStatus();
+  window.addEventListener("resize", checkLoginNewsletterStatus);
 });
