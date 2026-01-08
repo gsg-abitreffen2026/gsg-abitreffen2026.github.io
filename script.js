@@ -459,8 +459,20 @@ document.addEventListener("DOMContentLoaded", () => {
     galleryImage.src = galleryImages[currentIndex];
   }
 
+  function toGalleryUrl(url) {
+    if (!url) return "";
+    if (url.includes("drive.google.com/thumbnail")) return url;
+    const match = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (match && match[1]) {
+      return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1600`;
+    }
+    return url;
+  }
+
   function setGalleryImages(list) {
-    galleryImages = Array.isArray(list) ? list.filter(Boolean) : [];
+    galleryImages = Array.isArray(list)
+      ? list.map(toGalleryUrl).filter(Boolean)
+      : [];
     currentIndex = 0;
     renderGallery();
   }
