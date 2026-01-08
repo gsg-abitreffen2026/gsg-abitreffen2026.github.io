@@ -38,6 +38,7 @@
           <input type="text" id="loginCode" placeholder="Zugangscode" required />
           <button type="submit" class="button">Einloggen</button>
         </form>
+        <p class="login-hint">Zugangscode nach Prüfung per Mail. Wenn nach 24h nichts kommt, bitte im Kontaktformular melden.</p>
         <p id="loginMessage"></p>
       </div>
     </nav>
@@ -91,6 +92,7 @@
           <input type="text" id="loginCodeMitte" placeholder="Zugangscode" required />
           <button type="submit" class="button">Einloggen</button>
         </form>
+        <p class="login-hint">Zugangscode nach Prüfung per Mail. Wenn nach 24h nichts kommt, bitte im Kontaktformular melden.</p>
         <p id="loginMessageMitte"></p>
       </section>
 
@@ -146,28 +148,43 @@
       <!-- Ort -->
       <div class="content-box box-place">
         <h3><i class="fas fa-map-marker-alt"></i> Ort</h3>
-        <p class="place-line">
-          <a class="place-link"
-             href="https://www.wirtshaus-ratze.de"
-             target="_blank" rel="noopener noreferrer"
-             title="Website des Wirtshaus Ratze"><strong>Wirtshaus Ratze</strong></a>
-          <br>
-          <span class="place-after">
-            <span class="muted">in</span>
-            <a class="place-link secondary"
+        <div class="place-row">
+          <p class="place-line">
+            <a class="place-link"
+               href="https://www.wirtshaus-ratze.de"
+               target="_blank" rel="noopener noreferrer"
+               title="Website des Wirtshaus Ratze"><strong>Wirtshaus Ratze</strong></a>
+            <br>
+            <span class="place-after">
+              <span class="muted">in</span>
+              <a class="place-link secondary"
+                 href="https://www.google.com/maps/search/?api=1&query=Wirtshaus%20Ratze%2C%20Raichberg%204%2C%2070186%20Stuttgart"
+                 target="_blank" rel="noopener noreferrer"
+                 title="Wirtshaus Ratze auf Google Maps">
+                Stuttgart‑Ost
+                <svg class="pin pin-diag" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <circle class="target-outer" cx="8" cy="16" r="4.25" />
+                  <circle class="target-inner" cx="8" cy="16" r="2.0" />
+                  <line class="pin-needle" x1="8" y1="16" x2="19.2" y2="6.8" />
+                  <circle class="pin-head" cx="19.2" cy="6.8" r="2.6" />
+                </svg>
+              </a>
+            </span>
+          </p>
+          <div class="map-thumb" aria-hidden="true">
+            <iframe
+              title="Karte Wirtshaus Ratze"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              src="https://www.google.com/maps?q=Wirtshaus%20Ratze%2C%20Raichberg%204%2C%2070186%20Stuttgart&output=embed">
+            </iframe>
+            <a class="map-thumb-link"
                href="https://www.google.com/maps/search/?api=1&query=Wirtshaus%20Ratze%2C%20Raichberg%204%2C%2070186%20Stuttgart"
                target="_blank" rel="noopener noreferrer"
-               title="Wirtshaus Ratze auf Google Maps">
-              Stuttgart‑Ost
-              <svg class="pin pin-diag" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <circle class="target-outer" cx="8" cy="16" r="4.25" />
-                <circle class="target-inner" cx="8" cy="16" r="2.0" />
-                <line class="pin-needle" x1="8" y1="16" x2="19.2" y2="6.8" />
-                <circle class="pin-head" cx="19.2" cy="6.8" r="2.6" />
-              </svg>
+               aria-label="Karte auf Google Maps öffnen">
             </a>
-          </span>
-        </p>
+          </div>
+        </div>
       </div>
 
       <!-- Countdown -->

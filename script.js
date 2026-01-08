@@ -75,6 +75,9 @@ document.addEventListener("DOMContentLoaded", () => {
   let galleryImage = null;
   let prevBtn = null;
   let nextBtn = null;
+  let verbindlichChecked = false;
+  let verbindlichCheckInFlight = false;
+  let lastVerbindlichEmail = "";
   function showGalerie() {
     newsletterBox?.classList.add("hidden");
     galerieLoginBox?.classList.add("hidden");
@@ -103,6 +106,49 @@ document.addEventListener("DOMContentLoaded", () => {
     if (verbindlichNachname && !verbindlichNachname.value) verbindlichNachname.value = storedNachname;
     if (verbindlichEmail && !verbindlichEmail.value) verbindlichEmail.value = storedEmail;
   }
+  function refreshVerbindlichStatus() {
+    const loggedIn = localStorage.getItem("loggedIn") === "true";
+    const email = localStorage.getItem("loginEmail") || "";
+    const code = localStorage.getItem("loginCode") || "";
+
+    if (!loggedIn || !email || !code) return;
+    if (verbindlichCheckInFlight) return;
+    if (verbindlichChecked && email === lastVerbindlichEmail) return;
+
+    verbindlichCheckInFlight = true;
+
+    fetch("https://gsg-proxy.vercel.app/api/proxy", {
+      method: "POST",
+      body: new URLSearchParams({
+        action: "verbindlich_status",
+        email,
+        code
+      })
+    })
+    .then(async response => {
+      const text = await response.text();
+      try { return JSON.parse(text); }
+      catch (err) {
+        console.error("Verbindlich-Status Response:", text.slice(0, 200));
+        throw err;
+      }
+    })
+    .then(data => {
+      if (data.result === "success" || data.success === true) {
+        const isCommitted = !!data.verbindlich;
+        localStorage.setItem("verbindlichAngemeldet", isCommitted ? "true" : "false");
+      }
+    })
+    .catch(err => {
+      console.error("Verbindlich-Status Fehler:", err);
+    })
+    .finally(() => {
+      verbindlichCheckInFlight = false;
+      verbindlichChecked = true;
+      lastVerbindlichEmail = email;
+      updateVerbindlichStatus();
+    });
+  }
   function updateUploadStatus() {
     const loggedIn = localStorage.getItem("loggedIn") === "true";
     const uploadAllowed = localStorage.getItem("uploadAllowed") === "true";
@@ -112,6 +158,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (localStorage.getItem("loggedIn") === "true") {
       showGalerie();
       loadGalleryList();
+      refreshVerbindlichStatus();
     } else {
       showLogin(localStorage.getItem("newsletterVorname"));
     }
@@ -384,6 +431,9 @@ document.addEventListener("DOMContentLoaded", () => {
           localStorage.setItem("uploadAllowed", data.upload ? "true" : "false");
           localStorage.setItem("loginEmail", email);
           localStorage.setItem("loginCode", code);
+          verbindlichChecked = false;
+          lastVerbindlichEmail = "";
+          refreshVerbindlichStatus();
           if (msg) {
             msg.textContent = "Erfolgreich eingeloggt.";
             msg.style.color = "green";
