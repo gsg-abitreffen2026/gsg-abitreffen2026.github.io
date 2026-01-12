@@ -69,6 +69,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const uploadFile = document.getElementById("upload-file");
   const uploadStatus = document.getElementById("upload-status");
   const galleryStatus = document.getElementById("gallery-status");
+  const codeResetModal = document.getElementById("codeResetModal");
+  const codeResetForm = document.getElementById("codeResetForm");
+  const codeResetEmail = document.getElementById("codeResetEmail");
+  const codeResetMessage = document.getElementById("codeResetMessage");
+  const codeResetClose = document.getElementById("codeResetClose");
+  const codeResetTriggers = document.querySelectorAll("[data-reset-open='true']");
   let galleryImages = [];
   let currentIndex = 0;
   let galleryLoaded = false;
@@ -78,6 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let verbindlichChecked = false;
   let verbindlichCheckInFlight = false;
   let lastVerbindlichEmail = "";
+
   function showGalerie() {
     newsletterBox?.classList.add("hidden");
     galerieLoginBox?.classList.add("hidden");
@@ -154,6 +161,109 @@ document.addEventListener("DOMContentLoaded", () => {
     const uploadAllowed = localStorage.getItem("uploadAllowed") === "true";
     uploadBox?.classList.toggle("hidden", !(loggedIn && uploadAllowed));
   }
+
+  function openCodeResetModal(prefillEmail = "") {
+    if (!codeResetModal) return;
+    codeResetModal.classList.remove("hidden");
+    codeResetModal.setAttribute("aria-hidden", "false");
+    if (codeResetEmail) {
+      codeResetEmail.value = prefillEmail || codeResetEmail.value || "";
+      codeResetEmail.focus();
+    }
+    if (codeResetMessage) {
+      codeResetMessage.textContent = "";
+      codeResetMessage.style.color = "";
+    }
+  }
+
+  function closeCodeResetModal() {
+    if (!codeResetModal) return;
+    codeResetModal.classList.add("hidden");
+    codeResetModal.setAttribute("aria-hidden", "true");
+    codeResetForm?.reset();
+    if (codeResetMessage) {
+      codeResetMessage.textContent = "";
+      codeResetMessage.style.color = "";
+    }
+  }
+
+  codeResetTriggers.forEach(button => {
+    button.addEventListener("click", (e) => {
+      e.preventDefault();
+      const preset = localStorage.getItem("loginEmail") || localStorage.getItem("newsletterEmail") || "";
+      openCodeResetModal(preset);
+    });
+  });
+
+  codeResetClose?.addEventListener("click", (e) => {
+    e.preventDefault();
+    closeCodeResetModal();
+  });
+
+  codeResetModal?.addEventListener("click", (e) => {
+    if (e.target === codeResetModal) closeCodeResetModal();
+  });
+
+  codeResetForm?.addEventListener("submit", function (e) {
+    e.preventDefault();
+    const submitBtn = codeResetForm.querySelector("button[type='submit']");
+    if (submitBtn) submitBtn.disabled = true;
+
+    const email = codeResetEmail?.value.trim() || "";
+    if (!email) {
+      if (codeResetMessage) {
+        codeResetMessage.textContent = "Bitte eine E-Mail-Adresse eingeben.";
+        codeResetMessage.style.color = "red";
+      }
+      if (submitBtn) submitBtn.disabled = false;
+      return;
+    }
+
+    if (codeResetMessage) {
+      codeResetMessage.textContent = "Code wird gesendet...";
+      codeResetMessage.style.color = "#0073b1";
+    }
+
+    fetch("https://gsg-proxy.vercel.app/api/proxy", {
+      method: "POST",
+      body: new URLSearchParams({
+        action: "code_reset",
+        email
+      })
+    })
+    .then(async response => {
+      const text = await response.text();
+      try { return JSON.parse(text); }
+      catch (err) {
+        console.error("Code-Reset Response:", text.slice(0, 200));
+        throw err;
+      }
+    })
+    .then(data => {
+      if (data.result === "success" || data.success === true) {
+        if (codeResetMessage) {
+          codeResetMessage.textContent = "Code wurde erneut an die E-Mail-Adresse gesendet. Bitte ggf. den Spam-Ordner prüfen.";
+          codeResetMessage.style.color = "green";
+        }
+      } else {
+        if (codeResetMessage) {
+          codeResetMessage.textContent = data.message || "E-Mail-Adresse nicht gefunden. Bitte prüfen und ggf. neu für den Newsletter anmelden.";
+          codeResetMessage.style.color = "red";
+        }
+      }
+    })
+    .catch(err => {
+      if (codeResetMessage) {
+        codeResetMessage.textContent = "Fehler beim Versand. Bitte später erneut versuchen.";
+        codeResetMessage.style.color = "red";
+      }
+      console.error("Code-Reset Fehler:", err);
+    })
+    .finally(() => {
+      if (submitBtn) submitBtn.disabled = false;
+    });
+  });
+
   function checkLoginNewsletterStatus() {
     if (localStorage.getItem("loggedIn") === "true") {
       showGalerie();
@@ -165,6 +275,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updateVerbindlichStatus();
     updateUploadStatus();
   }
+
   // ===== Newsletter-Formular (robust, ohne Dopplung!) =====
   const newsletterForm = document.getElementById("newsletter-form");
   if (newsletterForm) {

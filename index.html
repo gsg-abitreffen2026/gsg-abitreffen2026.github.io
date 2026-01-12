@@ -32,13 +32,14 @@
       </ul>
 
       <div id="galerie-login-box" class="content-box hidden">
-        <h3>Galerie-Login</h3>
+        <h3>Login</h3>
         <form id="loginForm">
           <input type="email" id="loginEmail" placeholder="E-Mail" required />
           <input type="text" id="loginCode" placeholder="Zugangscode" required />
           <button type="submit" class="button">Einloggen</button>
         </form>
         <p class="login-hint">Den Code erhaltet ihr nach erfolgreicher Newsletteranmeldung und Prüfung per Mail.</p>
+        <button type="button" class="login-reset" data-reset-open="true">Code vergessen?</button>
         <p id="loginMessage"></p>
       </div>
     </nav>
@@ -74,7 +75,7 @@
       </section>
 
       <section id="newsletter" class="content-box">
-        <h2>Newsletter</h2>
+        <h2>Anmeldung</h2>
         <form id="newsletter-form">
           <input type="text" id="newsletter-vorname" placeholder="Vorname" required />
           <input type="text" id="newsletter-nachname" placeholder="Nachname" required />
@@ -86,13 +87,14 @@
       </section>
 
       <section id="galerie-login-mitte" class="content-box hidden">
-        <h3>Galerie-Login</h3>
+        <h3>Login</h3>
         <form id="loginFormMitte">
           <input type="email" id="loginEmailMitte" placeholder="E-Mail" required />
           <input type="text" id="loginCodeMitte" placeholder="Zugangscode" required />
           <button type="submit" class="button">Einloggen</button>
         </form>
         <p class="login-hint">Den Code erhaltet ihr nach erfolgreicher Newsletteranmeldung und Prüfung per Mail.</p>
+        <button type="button" class="login-reset" data-reset-open="true">Code vergessen?</button>
         <p id="loginMessageMitte"></p>
       </section>
 
@@ -207,6 +209,19 @@
     <a href="#galerie">Galerie</a>
     <a href="#kontakt">Kontakt</a>
     <a href="#" id="shareButtonMobile" class="share-button">Seite teilen</a>
+  </div>
+
+  <div id="codeResetModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="codeResetTitle">
+      <button type="button" class="modal-close" id="codeResetClose" aria-label="Schließen">x</button>
+      <h3 id="codeResetTitle">Code erneut senden</h3>
+      <p class="modal-hint">E-Mail eingeben, dann senden wir den Code erneut.</p>
+      <form id="codeResetForm">
+        <input type="email" id="codeResetEmail" placeholder="E-Mail" required />
+        <button type="submit" class="button">Code anfordern</button>
+      </form>
+      <p id="codeResetMessage" class="form-status"></p>
+    </div>
   </div>
 
   <footer>
