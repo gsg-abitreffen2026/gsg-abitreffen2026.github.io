@@ -6,6 +6,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const lightboxImage = document.getElementById("lightboxImage");
   const lightboxLabel = document.getElementById("lightboxLabel");
   const lightboxClose = document.getElementById("lightboxClose");
+  const lightboxPrev = document.getElementById("lightboxPrev");
+  const lightboxNext = document.getElementById("lightboxNext");
+
+  let galleryItems = [];
+  let currentIndex = -1;
 
   function showStatus(message, color) {
     if (!status) return;
@@ -37,14 +42,33 @@ document.addEventListener("DOMContentLoaded", () => {
     return null;
   }
 
-  function openLightbox(item) {
-    if (!lightbox || !lightboxImage) return;
+  function isLightboxOpen() {
+    return lightbox && !lightbox.classList.contains("hidden");
+  }
+
+  function renderLightbox() {
+    if (!lightbox || !lightboxImage || currentIndex < 0) return;
+    const item = galleryItems[currentIndex];
     lightboxImage.src = item.url;
     if (lightboxLabel) {
       lightboxLabel.textContent = item.uploader || "";
     }
+  }
+
+  function openLightboxAt(index) {
+    if (!lightbox || !lightboxImage || !galleryItems.length) return;
+    currentIndex = ((index % galleryItems.length) + galleryItems.length) % galleryItems.length;
+    renderLightbox();
     lightbox.classList.remove("hidden");
     lightbox.setAttribute("aria-hidden", "false");
+  }
+
+  function stepLightbox(direction) {
+    if (!galleryItems.length) return;
+    if (currentIndex < 0) {
+      currentIndex = 0;
+    }
+    openLightboxAt(currentIndex + direction);
   }
 
   function closeLightbox() {
@@ -53,6 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
     lightbox.setAttribute("aria-hidden", "true");
     lightboxImage.src = "";
     if (lightboxLabel) lightboxLabel.textContent = "";
+    currentIndex = -1;
   }
 
   lightboxClose?.addEventListener("click", (e) => {
@@ -60,12 +85,28 @@ document.addEventListener("DOMContentLoaded", () => {
     closeLightbox();
   });
 
+  lightboxPrev?.addEventListener("click", (e) => {
+    e.preventDefault();
+    stepLightbox(-1);
+  });
+
+  lightboxNext?.addEventListener("click", (e) => {
+    e.preventDefault();
+    stepLightbox(1);
+  });
+
   lightbox?.addEventListener("click", (e) => {
     if (e.target === lightbox) closeLightbox();
   });
 
   window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeLightbox();
+    if (e.key === "Escape") {
+      closeLightbox();
+      return;
+    }
+    if (!isLightboxOpen()) return;
+    if (e.key === "ArrowLeft") stepLightbox(-1);
+    if (e.key === "ArrowRight") stepLightbox(1);
   });
 
   const loggedIn = localStorage.getItem("loggedIn") === "true";
@@ -96,11 +137,11 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const items = Array.isArray(data.images)
+    galleryItems = Array.isArray(data.images)
       ? data.images.map(normalizeGalleryItem).filter(Boolean)
       : [];
 
-    if (!items.length) {
+    if (!galleryItems.length) {
       showStatus("Noch keine Bilder in der Galerie.", "");
       return;
     }
@@ -108,7 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (grid) {
       grid.classList.remove("hidden");
       grid.innerHTML = "";
-      items.forEach(item => {
+      galleryItems.forEach((item, index) => {
         const button = document.createElement("button");
         button.type = "button";
         button.className = "gallery-thumb";
@@ -127,7 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
           button.appendChild(label);
         }
 
-        button.addEventListener("click", () => openLightbox(item));
+        button.addEventListener("click", () => openLightboxAt(index));
         grid.appendChild(button);
       });
     }

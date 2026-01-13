@@ -62,7 +62,8 @@ form button[type="submit"] { display: block; width: 100%; max-width: 500px; marg
 
 
 .gallery-uploader { position: absolute; right: 10px; bottom: 10px; background: rgba(0,0,0,0.55); color: #fff; font-size: 0.75rem; padding: 4px 8px; border-radius: 999px; pointer-events: none; }
-.gallery-actions { margin-top: 10px; display: flex; justify-content: center; }
+.gallery-actions { margin-top: 10px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.gallery-actions-top { margin-top: 0; margin-bottom: 12px; }
 
 .gallery-page .container { max-width: 1100px; }
 .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
@@ -73,6 +74,12 @@ form button[type="submit"] { display: block; width: 100%; max-width: 500px; marg
 .lightbox-content { position: relative; background: #fff; border-radius: 12px; padding: 12px; max-width: min(92vw, 900px); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
 .lightbox-img { display: block; max-width: 88vw; max-height: 80vh; width: auto; height: auto; border-radius: 8px; }
 .lightbox-label { margin-top: 8px; font-size: 0.85rem; color: #555; text-align: right; }
+
+.lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); border: 0; color: #fff; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 1.1rem; }
+.lightbox-prev { left: 8px; }
+.lightbox-next { right: 8px; }
+.lightbox-nav:hover { background: rgba(0,0,0,0.7); }
+
 
 /* ===== Footer ===== */
 footer { text-align: center; font-size: 0.9em; padding: 20px; color: #888; background: none; }
