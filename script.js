@@ -69,6 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const uploadFile = document.getElementById("upload-file");
   const uploadStatus = document.getElementById("upload-status");
   const galleryStatus = document.getElementById("gallery-status");
+  const galleryUploader = document.getElementById("gallery-uploader");
   const codeResetModal = document.getElementById("codeResetModal");
   const codeResetForm = document.getElementById("codeResetForm");
   const codeResetEmail = document.getElementById("codeResetEmail");
@@ -602,6 +603,8 @@ document.addEventListener("DOMContentLoaded", () => {
     galleryImage?.classList.add("hidden");
     prevBtn?.classList.add("hidden");
     nextBtn?.classList.add("hidden");
+    galleryUploader?.classList.add("hidden");
+    if (galleryUploader) galleryUploader.textContent = "";
     if (galleryStatus) galleryStatus.textContent = message;
   }
 
@@ -617,7 +620,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (galleryStatus) galleryStatus.textContent = "";
 
     currentIndex = ((currentIndex % galleryImages.length) + galleryImages.length) % galleryImages.length;
-    galleryImage.src = galleryImages[currentIndex];
+    const current = galleryImages[currentIndex];
+    galleryImage.src = current.url;
+    if (galleryUploader) {
+      if (current.uploader) {
+        galleryUploader.textContent = current.uploader;
+        galleryUploader.classList.remove("hidden");
+      } else {
+        galleryUploader.textContent = "";
+        galleryUploader.classList.add("hidden");
+      }
+    }
   }
 
   function toGalleryUrl(url) {
@@ -630,9 +643,23 @@ document.addEventListener("DOMContentLoaded", () => {
     return url;
   }
 
+  function normalizeGalleryItem(item) {
+    if (typeof item === "string") {
+      const url = toGalleryUrl(item);
+      return url ? { url, uploader: "" } : null;
+    }
+    if (item && typeof item === "object") {
+      const rawUrl = item.url || item.image || item.src || "";
+      const url = toGalleryUrl(rawUrl);
+      if (!url) return null;
+      return { url, uploader: item.uploader || item.name || "" };
+    }
+    return null;
+  }
+
   function setGalleryImages(list) {
     galleryImages = Array.isArray(list)
-      ? list.map(toGalleryUrl).filter(Boolean)
+      ? list.map(normalizeGalleryItem).filter(Boolean)
       : [];
     currentIndex = 0;
     renderGallery();

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Galerie – Klassentreffen 2026</title>
+  <meta name="description" content="Galerie mit allen Bildern vom Klassentreffen 2026." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="gallery-page">
+  <header>
+    <img src="GSG_Bearbeitet_NEU.jpg" alt="Abi-Treffen 2006" class="hero-img" loading="eager" fetchpriority="high" decoding="async" />
+    <div class="hero-text">
+      <h1>Galerie</h1>
+      <p>Alle Bilder auf einen Blick</p>
+    </div>
+  </header>
+
+  <div class="container">
+    <main>
+      <section class="content-box">
+        <h2>Galerie</h2>
+        <p id="galleryLoginNotice" class="form-status"></p>
+        <div id="galleryGrid" class="gallery-grid hidden"></div>
+        <p id="galleryGridStatus" class="form-status"></p>
+        <div class="gallery-actions">
+          <a class="button" href="index.html#galerie">Zurück zur Startseite</a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="galleryLightbox" class="modal hidden" aria-hidden="true">
+    <div class="lightbox-content" role="dialog" aria-modal="true" aria-label="Bildansicht">
+      <button type="button" class="modal-close" id="lightboxClose" aria-label="Schließen">x</button>
+      <img id="lightboxImage" class="lightbox-img" alt="Galeriebild" loading="lazy" decoding="async" />
+      <div id="lightboxLabel" class="lightbox-label"></div>
+    </div>
+  </div>
+
+  <script src="gallery.js?v=2026-09-11"></script>
+</body>
+</html>
