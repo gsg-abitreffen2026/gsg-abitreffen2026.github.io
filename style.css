@@ -135,9 +135,8 @@ footer p { margin: 0.3em 0; }
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
       "date  place"
-      "date  countdown"
+      "countdown countdown"
       "main  main";
-    /* WICHTIG: automatische Reihenhöhen, kein 1fr */
     grid-auto-rows: auto;
     gap: 12px;
     align-items: stretch;
@@ -148,10 +147,7 @@ footer p { margin: 0.3em 0; }
   main{ grid-area: main; }
   .box-date{ grid-area: date; }
   .box-place{ grid-area: place; }
-.box-countdown {
-  grid-area: countdown;
-  padding: 0.8rem 1rem;
-}
+  .box-countdown { grid-area: countdown; padding: 0.8rem 1rem; }
 .box-countdown h3 {
   margin-bottom: 0.4rem;
 }
@@ -159,9 +155,7 @@ footer p { margin: 0.3em 0; }
   margin: 0;
   line-height: 1.2;
 }
-
-
-  /* WICHTIG: keine erzwungene Höhe */
+  .box-date, .box-place{ align-self: stretch; }
   .box-date, .box-place, .box-countdown{ height: auto; max-height: 70vh; }
 
   .right-column .content-box{ max-width: none !important; margin: 0 !important; width: 100% !important; }
