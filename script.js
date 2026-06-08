@@ -100,8 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   function updateVerbindlichStatus() {
     const hasNewsletter = !!localStorage.getItem("newsletterVorname") || localStorage.getItem("loggedIn") === "true";
-    const alreadyCommitted = localStorage.getItem("verbindlichAngemeldet") === "true";
-    const shouldShow = hasNewsletter && !alreadyCommitted;
+    const shouldShow = hasNewsletter;
 
     verbindlichSection?.classList.toggle("hidden", !shouldShow);
     if (!shouldShow) return;
