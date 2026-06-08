@@ -247,6 +247,7 @@ aside.right-column .content-box { padding-left: 12px; padding-right: 12px; }
 .buffet-heading { font-size: 1rem; font-weight: 700; margin: 0 0 0.8rem; letter-spacing: 0.02em; }
 .buffet-gang-label { font-size: 0.78em; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin: 0.9rem 0 0.15rem; font-weight: 600; }
 .buffet-gang { margin: 0; color: #333; font-size: 0.97em; }
+.buffet-hinweis { font-size: 0.85em; color: #888; font-style: italic; margin: 0.8rem 0 0; }
 .abend-spende { font-size: 0.95em; color: #444; margin-bottom: 0; }
 .abend-cta { margin-top: 1rem; font-style: italic; color: #0073b1; }
 .abend-upload-btn { display: inline-block; margin-top: 0.6rem; }
