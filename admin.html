@@ -146,6 +146,10 @@
             <th>Vorname</th>
             <th>Nachname</th>
             <th>E-Mail</th>
+            <th>Teilnehmer</th>
+            <th>Gäste</th>
+            <th>Kinder</th>
+            <th>Betrag</th>
             <th>Löschen</th>
           </tr>
         </thead>
@@ -162,6 +166,10 @@
             <th>Nachname</th>
             <th>E-Mail</th>
             <th>Zugangscode</th>
+            <th>Teilnehmer</th>
+            <th>Gäste</th>
+            <th>Kinder</th>
+            <th>Betrag</th>
             <th>Upload</th>
             <th>Löschen</th>
           </tr>
@@ -225,9 +233,9 @@
     }
   }
 
-  async function loadAdminData() {
-    const spinner = document.getElementById("spinner");
-    spinner.classList.remove("hidden");
+	  async function loadAdminData() {
+	    const spinner = document.getElementById("spinner");
+	    spinner.classList.remove("hidden");
 
     try {
       const res = await fetch("https://gsg-proxy.vercel.app/api/proxy");
@@ -245,10 +253,14 @@
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td><input type="checkbox" class="freigabe-checkbox" data-index="${i}"></td>
-          <td>${row.vorname}</td>
-          <td>${row.nachname}</td>
-          <td>${row.email}</td>
-          <td><button onclick="loeschen('${row.email}')">Löschen</button></td>
+	          <td>${row.vorname}</td>
+	          <td>${row.nachname}</td>
+	          <td>${row.email}</td>
+	          <td>${row.teilnehmer || ""}</td>
+	          <td>${row.gaeste || ""}</td>
+	          <td>${row.kinder || ""}</td>
+	          <td>${formatEuro(row.betrag)}</td>
+	          <td><button onclick="loeschen('${row.email}')">Löschen</button></td>
         `;
         t1.appendChild(tr);
       });
@@ -258,10 +270,14 @@
         const uploadValue = (row.upload || "").toLowerCase() === "ja" ? "ja" : "nein";
         tr.innerHTML = `
           <td>${row.vorname}</td>
-          <td>${row.nachname}</td>
-          <td>${row.email}</td>
-          <td>${row.code}</td>
-          <td>
+	          <td>${row.nachname}</td>
+	          <td>${row.email}</td>
+	          <td>${row.code}</td>
+	          <td>${row.teilnehmer || ""}</td>
+	          <td>${row.gaeste || ""}</td>
+	          <td>${row.kinder || ""}</td>
+	          <td>${formatEuro(row.betrag)}</td>
+	          <td>
             <select onchange="setUpload('${row.email}', this.value)">
               <option value="ja" ${uploadValue === "ja" ? "selected" : ""}>Ja</option>
               <option value="nein" ${uploadValue === "nein" ? "selected" : ""}>Nein</option>
@@ -278,9 +294,13 @@
     } finally {
       spinner.classList.add("hidden");
     }
-  }
+	  }
 
-  function toggleAll(master) {
+	  function formatEuro(value) {
+	    return value ? `${value} €` : "";
+	  }
+
+	  function toggleAll(master) {
     document.querySelectorAll(".freigabe-checkbox").forEach(cb => cb.checked = master.checked);
   }
 
