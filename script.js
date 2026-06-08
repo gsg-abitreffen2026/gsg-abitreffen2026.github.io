@@ -174,6 +174,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const kidsInput = document.getElementById("payment-kids");
     const saveStatus = document.getElementById("payment-save-status");
     const totalEl = document.getElementById("payment-total");
+    const purposeEl = document.getElementById("payment-purpose");
+    const copyPurposeButton = document.getElementById("payment-copy-purpose");
     const paymentLink = document.getElementById("payment-link");
     const paymentQrLink = document.getElementById("payment-qr-link");
     const paymentQr = document.getElementById("payment-qr");
@@ -231,6 +233,21 @@ document.addEventListener("DOMContentLoaded", () => {
       showPaymentStep("counts");
     });
 
+    copyPurposeButton?.addEventListener("click", async () => {
+      const text = purposeEl?.textContent || "";
+      if (!text) return;
+
+      try {
+        await navigator.clipboard.writeText(text);
+        copyPurposeButton.textContent = "Kopiert";
+        setTimeout(() => {
+          copyPurposeButton.textContent = "Kopieren";
+        }, 1600);
+      } catch (error) {
+        console.error("Betreff konnte nicht kopiert werden", error);
+      }
+    });
+
     calculateButton?.addEventListener("click", async () => {
       const selection = {
         participants: readCount(participantsInput, 1),
@@ -244,8 +261,14 @@ document.addEventListener("DOMContentLoaded", () => {
       if (kidsInput) kidsInput.value = String(selection.kids);
 
       if (totalEl) totalEl.textContent = `${selection.total} €`;
+      const nameParts = [
+        localStorage.getItem("newsletterVorname") || "",
+        localStorage.getItem("newsletterNachname") || ""
+      ].filter(Boolean);
+      const purpose = `Abitreffen 2026${nameParts.length ? ` - ${nameParts.join(" ")}` : ""}`;
+      if (purposeEl) purposeEl.textContent = purpose;
 
-      const paypalUrl = `https://paypal.me/gsgabitreffen/${selection.total}`;
+      const paypalUrl = `https://paypal.me/gsgabitreffen/${selection.total}EUR`;
       const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(paypalUrl)}`;
 
       if (paymentLink) paymentLink.href = paypalUrl;

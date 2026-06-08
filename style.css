@@ -49,6 +49,10 @@ h3 { margin-top: 0; }
 .payment-counts label { display: grid; gap: 6px; font-weight: 600; }
 .payment-counts input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
 .payment-total { font-size: 1.6rem; margin-bottom: 0.8rem; }
+.payment-purpose { display: grid; gap: 5px; margin: 0.8rem 0; padding: 10px; background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; }
+.payment-purpose span { color: #666; font-size: 0.85rem; }
+.payment-copy-button { justify-self: start; width: auto; margin-top: 4px; padding: 6px 10px; border: 1px solid #d7e3ef; border-radius: 4px; background: #fff; color: #0b5e8f; cursor: pointer; }
+.payment-copy-button:hover { background: #eef6fc; }
 
 /* ===== Forms ===== */
 form { padding: 1rem 0; }
