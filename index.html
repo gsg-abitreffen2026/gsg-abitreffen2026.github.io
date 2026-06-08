@@ -24,7 +24,8 @@
     <!-- Navigation (links) -->
     <nav>
       <ul>
-        <li><a href="#infos"><i class="fas fa-info-circle"></i> Infos</a></li>
+        <li><a href="#abend-infos"><i class="fas fa-glass-cheers"></i> Der Abend</a></li>
+        <li><a href="#verbindlich"><i class="fas fa-check-circle"></i> Anmeldung</a></li>
         <li><a href="#newsletter"><i class="fas fa-newspaper"></i> Newsletter</a></li>
         <li><a href="#galerie"><i class="fas fa-images"></i> Galerie</a></li>
         <li><a href="#kontakt"><i class="fas fa-envelope"></i> Kontakt</a></li>
@@ -46,19 +47,16 @@
 
     <!-- Hauptinhalt -->
     <main>
-      <section id="infos" class="content-box">
-        <h2>Allgemeine Infos</h2>
-        <p>Das 20-jährige Jubiläum steht bevor! Für alle die schon langsam Panik bekommen haben: Ja, wir werden nächstes Jahr ein Klassentreffen veranstalten ;)</p>
-        <p>Trage dich in den Newsletter ein und bleib auf dem Laufenden.</p>
-        <p>Beste Grüße, euer Maxi</p>
-        <p>PS: Und eine Bitte noch: Teilt die Seite mit allen, die ihr von damals noch kennt (geht auch über den Button im Menü).</p>
-      </section>
-
-      <section id="news" class="content-box">
-        <h2>News 14.08.2025</h2>
-        <p>Das Klassentreffen wird am <b>11.07.2026</b> stattfinden.</p>
-        <p>Die Location ist das <b>Wirtshaus Ratze</b> in Stuttgart-Ost. Ich werde in den nächsten Tagen ein paar Bilder in der Galerie posten.</p>
-        <p>Beste Grüße, euer Maxi</p>
+      <section id="abend-infos" class="content-box">
+        <h2>Der Abend</h2>
+        <ul class="abend-list">
+          <li><strong>17:00 Uhr</strong> – Einlass &amp; Sektempfang</li>
+          <li><strong>ca. 18:30 Uhr</strong> – Eröffnung Buffet</li>
+          <li><strong>ganzer Abend</strong> – Bilder-Show aus 20 Jahren</li>
+        </ul>
+        <p>Es wird eine Spenden-Box für den Verein <a href="https://www.schlaganfall-kinder.de" target="_blank" rel="noopener noreferrer"><strong>Schaki e.V.</strong></a> aufgestellt – Kinder nach Schlaganfall. Wer möchte, kann gerne etwas beisteuern.</p>
+        <p class="abend-cta">Habt ihr noch Fotos von damals? Schickt sie uns – je mehr, desto besser!</p>
+        <a class="button abend-upload-btn" href="https://www.dropbox.com/request/qeq9of5p7l9h5vy2dx2w" target="_blank" rel="noopener noreferrer"><i class="fas fa-cloud-upload-alt"></i> Bilder hochladen</a>
       </section>
 
       <section id="verbindlich" class="content-box hidden">
@@ -70,6 +68,7 @@
             <h3>Beitrag berechnen</h3>
             <p>Für das Klassentreffen plane ich mit Kosten für Sektempfang, umfangreiches Buffet sowie Dekoration und Organisation. Die Gesamtkosten pro Teilnehmer belaufen sich daher auf <strong>50 €</strong>.</p>
             <p>Für jeden weiteren Gast, den ihr mitbringt, fallen <strong>40 €</strong> an, für Kinder von 4 bis 11 Jahren <strong>25 €</strong>.</p>
+            <p>Ein etwaiger Überschuss wird an den Verein <a href="https://www.schlaganfall-kinder.de" target="_blank" rel="noopener noreferrer"><strong>Schaki e.V.</strong></a> gespendet.</p>
             <button type="button" class="button payment-next" data-payment-next="counts">Weiter</button>
           </div>
 
@@ -103,6 +102,7 @@
                 <strong id="payment-purpose">Abitreffen 2026</strong>
                 <button type="button" class="payment-copy-button" id="payment-copy-purpose">Kopieren</button>
               </div>
+              <p>Bitte gibt in der PayPal-Notiz deinen Namen an, falls dieser nicht aus deiner Mailadresse oder deinem PayPal-Profil hervorgeht.</p>
               <p>Wer kein PayPal nutzt, meldet sich bitte direkt bei mir.</p>
               <a class="button payment-button" id="payment-link" href="https://paypal.me/gsgabitreffen/50EUR" target="_blank" rel="noopener noreferrer">PayPal öffnen</a>
             </div>
@@ -183,7 +183,7 @@
       <!-- Datum -->
       <div class="content-box box-date">
         <h3><i class="fas fa-calendar-alt"></i> Datum</h3>
-        <p><b>11. Juli 2026</b></p>
+        <p><b>11. Juli 2026</b><br><span style="font-weight:normal;font-size:0.92em;">ab 17:00 Uhr</span></p>
         <div class="addcal-row">
           <a id="icsLink" class="addcal">Termin speichern</a>
           <a id="gcalLink" class="addcal secondary">Google Kalender</a>
@@ -247,7 +247,8 @@
   </button>
 
   <div class="mobile-menu" id="mobileMenu">
-    <a href="#infos">Infos</a>
+    <a href="#abend-infos">Der Abend</a>
+    <a href="#verbindlich">Anmeldung</a>
     <a href="#newsletter">Newsletter</a>
     <a href="#galerie">Galerie</a>
     <a href="#kontakt">Kontakt</a>

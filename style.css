@@ -236,3 +236,15 @@ aside.right-column .content-box { padding-left: 12px; padding-right: 12px; }
 .modal-close { position: absolute; top: 8px; right: 10px; background: none; border: 0; font-size: 1rem; color: #6b7280; cursor: pointer; }
 .modal-close:hover { color: #111827; }
 .modal-hint { font-size: 0.85em; color: #666; margin: 0 0 0.8rem; }
+
+/* Abend-Infos Box */
+.abend-list { list-style: none; padding: 0; margin: 0 0 1rem; }
+.abend-list li { padding: 6px 0; border-bottom: 1px solid #eee; }
+.abend-list li:last-child { border-bottom: none; }
+.abend-cta { margin-top: 1rem; font-style: italic; color: #0073b1; }
+.abend-upload-btn { display: inline-block; margin-top: 0.6rem; }
+
+/* Login-Box in der Mitte nur auf Mobile zeigen */
+@media (min-width: 769px) {
+  #galerie-login-mitte { display: none !important; }
+}
