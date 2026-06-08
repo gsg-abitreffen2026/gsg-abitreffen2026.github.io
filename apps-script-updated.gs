@@ -337,6 +337,8 @@ function handleVerbindlich(e) {
       .setValues([[teilnehmer, gaeste, kinder, betrag]]);
   }
 
+  const paypalLink = `https://paypal.me/gsgabitreffen/${betrag}EUR`;
+
   MailApp.sendEmail({
     to: email,
     subject: "Deine verbindliche Anmeldung zum Klassentreffen 2026",
@@ -347,8 +349,11 @@ function handleVerbindlich(e) {
       Teilnehmer: ${teilnehmer}<br>
       Partner/Gäste: ${gaeste}<br>
       Kinder von 4 bis 11 Jahren: ${kinder}<br>
-      Betrag: ${betrag} €<br><br>
-      Falls sich bei dir etwas ändert, gib mir bitte kurz Bescheid.<br><br>
+      Betrag: <b>${betrag}&nbsp;€</b><br><br>
+      Bitte überweise den Betrag bis zum <b>30. Juni 2026</b> über PayPal:<br>
+      <a href="${paypalLink}">${paypalLink}</a><br><br>
+      Falls du schon bezahlt hast – alles gut, diese Zeile einfach ignorieren.<br><br>
+      Falls sich bei dir sonst etwas ändert, gib mir kurz Bescheid.<br><br>
       Herzliche Grüße<br>Maxi`,
     replyTo: ADMIN_EMAIL
   });
