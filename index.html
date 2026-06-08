@@ -62,16 +62,21 @@
       </section>
 
       <section id="verbindlich" class="content-box hidden">
-        <h2>Verbindliche Zusage</h2>
-        <p>Hier kannst du deine verbindliche Zusage für das Klassentreffen geben.</p>
-        <form id="verbindlich-form">
-          <input type="text" id="verbindlich-vorname" placeholder="Vorname" required />
-          <input type="text" id="verbindlich-nachname" placeholder="Nachname" required />
-          <input type="email" id="verbindlich-email" placeholder="E-Mail" required />
-          <input type="text" id="verbindlich-honey" style="display: none" autocomplete="off" />
-          <button type="submit" class="button">Verbindlich anmelden</button>
-        </form>
-        <p id="verbindlich-message"></p>
+        <h2>Verbindliche Anmeldung</h2>
+        <p>Mit deiner Zusage und der Überweisung hilfst du uns, das Treffen verlässlich zu planen.</p>
+
+        <div class="payment-box">
+          <div class="payment-copy">
+            <h3>Beitrag überweisen</h3>
+            <p>Bitte überweise deinen Beitrag per PayPal an <strong>paypal.me/gsgabitreffen</strong>.</p>
+            <p>Bitte schreibe bei der Überweisung kurz dazu, falls du mit Familie kommst, und passe den Betrag entsprechend an.</p>
+            <p>Wer kein PayPal nutzt, meldet sich bitte direkt bei mir.</p>
+            <a class="button payment-button" href="https://paypal.me/gsgabitreffen" target="_blank" rel="noopener noreferrer">PayPal öffnen</a>
+          </div>
+          <a class="payment-qr-link" href="https://paypal.me/gsgabitreffen" target="_blank" rel="noopener noreferrer" aria-label="PayPal-Link als QR-Code öffnen">
+            <img class="payment-qr" src="bilder/paypal-qr.svg" alt="QR-Code für PayPal-Zahlung an paypal.me/gsgabitreffen" loading="lazy" decoding="async" />
+          </a>
+        </div>
       </section>
 
       <section id="newsletter" class="content-box">
