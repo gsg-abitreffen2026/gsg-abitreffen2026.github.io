@@ -162,6 +162,118 @@ document.addEventListener("DOMContentLoaded", () => {
     uploadBox?.classList.toggle("hidden", !(loggedIn && uploadAllowed));
   }
 
+  function setupPaymentFlow() {
+    const paymentBox = document.querySelector(".payment-box");
+    if (!paymentBox) return;
+
+    const steps = paymentBox.querySelectorAll("[data-payment-step]");
+    const introNext = paymentBox.querySelector("[data-payment-next='counts']");
+    const calculateButton = document.getElementById("payment-calculate");
+    const participantsInput = document.getElementById("payment-participants");
+    const guestsInput = document.getElementById("payment-guests");
+    const kidsInput = document.getElementById("payment-kids");
+    const saveStatus = document.getElementById("payment-save-status");
+    const totalEl = document.getElementById("payment-total");
+    const paymentLink = document.getElementById("payment-link");
+    const paymentQrLink = document.getElementById("payment-qr-link");
+    const paymentQr = document.getElementById("payment-qr");
+
+    function showPaymentStep(stepName) {
+      steps.forEach(step => {
+        step.classList.toggle("hidden", step.dataset.paymentStep !== stepName);
+      });
+    }
+
+    function readCount(input, fallback) {
+      const min = Number(input?.min || 0);
+      const max = Number(input?.max || 20);
+      const value = Number.parseInt(input?.value || `${fallback}`, 10);
+      return Math.min(max, Math.max(min, Number.isNaN(value) ? fallback : value));
+    }
+
+    function setSaveStatus(message, color = "") {
+      if (!saveStatus) return;
+      saveStatus.textContent = message;
+      saveStatus.style.color = color;
+    }
+
+    async function savePaymentSelection(selection) {
+      const email = localStorage.getItem("loginEmail") || localStorage.getItem("newsletterEmail") || "";
+      const vorname = localStorage.getItem("newsletterVorname") || "";
+      const nachname = localStorage.getItem("newsletterNachname") || "";
+
+      if (!email) return;
+
+      const response = await fetch("https://gsg-proxy.vercel.app/api/proxy", {
+        method: "POST",
+        body: new URLSearchParams({
+          action: "verbindlich",
+          email,
+          vorname,
+          nachname,
+          teilnehmer: String(selection.participants),
+          gaeste: String(selection.guests),
+          kinder: String(selection.kids),
+          betrag: String(selection.total)
+        })
+      });
+
+      const text = await response.text();
+      try {
+        return JSON.parse(text);
+      } catch (err) {
+        console.error("Payment-Response:", text.slice(0, 200));
+        throw err;
+      }
+    }
+
+    introNext?.addEventListener("click", () => {
+      showPaymentStep("counts");
+    });
+
+    calculateButton?.addEventListener("click", async () => {
+      const selection = {
+        participants: readCount(participantsInput, 1),
+        guests: readCount(guestsInput, 0),
+        kids: readCount(kidsInput, 0)
+      };
+      selection.total = selection.participants * 50 + selection.guests * 40 + selection.kids * 25;
+
+      if (participantsInput) participantsInput.value = String(selection.participants);
+      if (guestsInput) guestsInput.value = String(selection.guests);
+      if (kidsInput) kidsInput.value = String(selection.kids);
+
+      if (totalEl) totalEl.textContent = `${selection.total} €`;
+
+      const paypalUrl = `https://paypal.me/gsgabitreffen/${selection.total}`;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(paypalUrl)}`;
+
+      if (paymentLink) paymentLink.href = paypalUrl;
+      if (paymentQrLink) paymentQrLink.href = paypalUrl;
+      if (paymentQr) paymentQr.src = qrUrl;
+
+      calculateButton.disabled = true;
+      setSaveStatus("Daten werden gespeichert...", "#0073b1");
+
+      try {
+        const data = await savePaymentSelection(selection);
+        if (data && data.result !== "success" && data.success !== true) {
+          setSaveStatus(data.message || "Daten konnten nicht gespeichert werden.", "red");
+          calculateButton.disabled = false;
+          return;
+        }
+
+        localStorage.setItem("verbindlichAngemeldet", "true");
+        setSaveStatus("");
+        showPaymentStep("result");
+      } catch (error) {
+        console.error("Zahlungsdaten konnten nicht gespeichert werden", error);
+        setSaveStatus("Daten konnten nicht gespeichert werden. Bitte später erneut versuchen.", "red");
+        calculateButton.disabled = false;
+      }
+    });
+  }
+
   function openCodeResetModal(prefillEmail = "") {
     if (!codeResetModal) return;
     codeResetModal.classList.remove("hidden");
@@ -764,6 +876,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   })();
 
+  setupPaymentFlow();
   checkLoginNewsletterStatus();
   window.addEventListener("resize", checkLoginNewsletterStatus);
 });
