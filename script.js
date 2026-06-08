@@ -847,8 +847,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ===== Kalender-Links (.ics + Google) =====
   (function () {
-    // 11.07.2026 15–24 Uhr CEST ⇒ 13:00–22:00 UTC
-    const DTSTART = '20260711T130000Z';
+    // 11.07.2026 17–24 Uhr CEST ⇒ 15:00–22:00 UTC
+    const DTSTART = '20260711T150000Z';
     const DTEND   = '20260711T220000Z';
 
     const TITLE         = 'Klassentreffen 2026';
@@ -869,7 +869,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const ics = [
         'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Abi2006//Website//DE','CALSCALE:GREGORIAN','METHOD:PUBLISH',
         'BEGIN:VEVENT',
-        'UID:klassentreffen-20260711T130000Z@abi2006.de',
+        'UID:klassentreffen-20260711T150000Z@abi2006.de',
         'DTSTAMP:' + toUtcStamp(new Date()),
         'DTSTART:' + DTSTART,
         'DTEND:' + DTEND,
