@@ -54,12 +54,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===== Countdown =====
   const countdownDate = new Date("2026-07-11T00:00:00").getTime();
   const countdownEls = document.querySelectorAll("#countdown, #countdown-box");
+  const abendCountdownEl = document.getElementById("abend-countdown");
   function updateCountdown() {
     const now = new Date().getTime();
     const diff = countdownDate - now;
     const days = Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
     const text = diff < 0 ? "Es ist so weit!" : `Noch ${days} Tage!`;
     countdownEls.forEach(el => el.textContent = text);
+    if (abendCountdownEl) {
+      abendCountdownEl.textContent = diff < 0 ? "es ist soweit" : `${days} Tagen`;
+    }
   }
   updateCountdown();
   setInterval(updateCountdown, 1000 * 60 * 60);
