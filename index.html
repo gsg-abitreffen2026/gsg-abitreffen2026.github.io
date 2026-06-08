@@ -26,7 +26,7 @@
       <ul>
         <li><a href="#abend-infos"><i class="fas fa-glass-cheers"></i> Der Abend</a></li>
         <li><a href="#verbindlich"><i class="fas fa-check-circle"></i> Anmeldung</a></li>
-        <li><a href="#newsletter"><i class="fas fa-newspaper"></i> Newsletter</a></li>
+        <li id="nav-newsletter-item"><a href="#newsletter"><i class="fas fa-newspaper"></i> Newsletter</a></li>
         <li><a href="#galerie"><i class="fas fa-images"></i> Galerie</a></li>
         <li><a href="#kontakt"><i class="fas fa-envelope"></i> Kontakt</a></li>
         <li><a href="#" id="shareButton" class="share-button"><i class="fas fa-share-alt"></i> Seite teilen</a></li>
@@ -159,17 +159,6 @@
         <p id="loginMessageMitte"></p>
       </section>
 
-      <section id="upload-box" class="content-box hidden">
-        <h2>Galerie-Upload</h2>
-        <p>Hier kannst du Bilder direkt in die Galerie hochladen.</p>
-        <form id="upload-form">
-          <input type="file" id="upload-file" accept="image/jpeg,image/png,image/heic,image/heif" required />
-          <p class="form-hint">Erlaubte Formate: JPG, PNG, HEIC/HEIF - Max 5 MB</p>
-          <button type="submit" class="button">Bild hochladen</button>
-        </form>
-        <p id="upload-status" class="form-status"></p>
-      </section>
-
       <section id="galerie" class="content-box hidden">
         <h2>Galerie</h2>
         <div class="gallery-wrapper">
@@ -182,6 +171,17 @@
           <a class="button" href="galerie.html">Alle Bilder ansehen</a>
         </div>
         <p id="gallery-status" class="form-status"></p>
+      </section>
+
+      <section id="upload-box" class="content-box hidden">
+        <h2>Galerie-Upload</h2>
+        <p>Hier kannst du Bilder direkt in die Galerie hochladen.</p>
+        <form id="upload-form">
+          <input type="file" id="upload-file" accept="image/jpeg,image/png,image/heic,image/heif" required />
+          <p class="form-hint">Erlaubte Formate: JPG, PNG, HEIC/HEIF - Max 5 MB</p>
+          <button type="submit" class="button">Bild hochladen</button>
+        </form>
+        <p id="upload-status" class="form-status"></p>
       </section>
 
       <section id="kontakt" class="content-box kontakt-collapsible collapsed">
@@ -271,7 +271,7 @@
   <div class="mobile-menu" id="mobileMenu">
     <a href="#abend-infos">Der Abend</a>
     <a href="#verbindlich">Anmeldung</a>
-    <a href="#newsletter">Newsletter</a>
+    <a href="#newsletter" id="mobile-nav-newsletter">Newsletter</a>
     <a href="#galerie">Galerie</a>
     <a href="#kontakt">Kontakt</a>
     <a href="#" id="shareButtonMobile" class="share-button">Seite teilen</a>

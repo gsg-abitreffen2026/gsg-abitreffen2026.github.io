@@ -54,6 +54,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ===== Login/Newsletter Status =====
   const newsletterBox = document.getElementById("newsletter");
+  const navNewsletterItem = document.getElementById("nav-newsletter-item");
+  const mobileNavNewsletter = document.getElementById("mobile-nav-newsletter");
   const galerieSection = document.getElementById("galerie");
   const galerieLoginBox = document.getElementById("galerie-login-box");
   const galerieLoginMitte = document.getElementById("galerie-login-mitte");
@@ -86,17 +88,23 @@ document.addEventListener("DOMContentLoaded", () => {
   let verbindlichCheckInFlight = false;
   let lastVerbindlichEmail = "";
 
+  function setNewsletterNavVisible(visible) {
+    navNewsletterItem?.classList.toggle("hidden", !visible);
+    mobileNavNewsletter?.classList.toggle("hidden", !visible);
+  }
   function showGalerie() {
     newsletterBox?.classList.add("hidden");
     galerieLoginBox?.classList.add("hidden");
     galerieLoginMitte?.classList.add("hidden");
     galerieSection?.classList.remove("hidden");
+    setNewsletterNavVisible(false);
   }
   function showLogin(hasNewsletter) {
     newsletterBox?.classList.toggle("hidden", !!hasNewsletter);
     galerieLoginBox?.classList.remove("hidden");
     galerieLoginMitte?.classList.remove("hidden");
     galerieSection?.classList.add("hidden");
+    setNewsletterNavVisible(!hasNewsletter);
   }
   function updateVerbindlichStatus() {
     const hasNewsletter = !!localStorage.getItem("newsletterVorname") || localStorage.getItem("loggedIn") === "true";
