@@ -121,12 +121,39 @@ function getOffeneAnmeldungen() {
   const sheet = SpreadsheetApp.getActive().getSheetByName("Anmeldungen");
   const daten = sheet.getDataRange().getValues();
   daten.shift();
+
+  // Zahlungsdaten aus "Verbindliche Anmeldungen" per E-Mail nachschlagen
+  const verbindlichMap = {};
+  const vSheet = SpreadsheetApp.getActive().getSheetByName("Verbindliche Anmeldungen");
+  if (vSheet) {
+    const vDaten = vSheet.getDataRange().getValues();
+    vDaten.slice(1).forEach(row => {
+      const email = (row[1] || "").toLowerCase().trim();
+      if (email) {
+        verbindlichMap[email] = {
+          teilnehmer: row[4] || "",
+          gaeste: row[5] || "",
+          kinder: row[6] || "",
+          betrag: row[7] || ""
+        };
+      }
+    });
+  }
+
   return daten
-    .map(row => ({
-      vorname: row[2],
-      nachname: row[3],
-      email: row[1]
-    }))
+    .map(row => {
+      const email = (row[1] || "").toLowerCase().trim();
+      const zahlung = verbindlichMap[email] || {};
+      return {
+        vorname: row[2],
+        nachname: row[3],
+        email: row[1],
+        teilnehmer: zahlung.teilnehmer || "",
+        gaeste: zahlung.gaeste || "",
+        kinder: zahlung.kinder || "",
+        betrag: zahlung.betrag || ""
+      };
+    })
     .sort((a, b) => a.vorname.localeCompare(b.vorname));
 }
 
