@@ -11,11 +11,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const burgerBtn = document.getElementById("burgerButton");
   const mobileMenu = document.getElementById("mobileMenu");
   let menuOpen = false;
+  function closeMenu() {
+    menuOpen = false;
+    burgerBtn?.classList.remove("open");
+    mobileMenu?.classList.remove("open");
+  }
   if (burgerBtn && mobileMenu) {
-    burgerBtn.addEventListener("click", () => {
+    burgerBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
       menuOpen = !menuOpen;
       burgerBtn.classList.toggle("open", menuOpen);
       mobileMenu.classList.toggle("open", menuOpen);
+    });
+    mobileMenu.addEventListener("click", closeMenu);
+    document.addEventListener("click", (e) => {
+      if (menuOpen && !mobileMenu.contains(e.target) && !burgerBtn.contains(e.target)) {
+        closeMenu();
+      }
     });
   }
 
