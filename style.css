@@ -240,6 +240,7 @@ aside.right-column .content-box { padding-left: 12px; padding-right: 12px; }
 /* Abend-Infos Box */
 .abend-box { line-height: 1.7; }
 .abend-greeting { font-size: 1em; color: #444; margin-bottom: 0.8rem; }
+#abend-countdown { font-style: italic; color: #0073b1; font-weight: 600; }
 .abend-intro { font-size: 1.05em; margin-bottom: 0; }
 .abend-intro em { font-style: italic; color: #0073b1; font-weight: 600; }
 .abend-divider { border: none; border-top: 1px solid #e0e0e0; margin: 1.2rem 0; }
