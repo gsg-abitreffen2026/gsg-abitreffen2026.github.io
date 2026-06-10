@@ -248,6 +248,14 @@ aside.right-column .content-box { padding-left: 12px; padding-right: 12px; }
 .buffet-gang-label { font-size: 0.78em; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin: 0.9rem 0 0.15rem; font-weight: 600; }
 .buffet-gang { margin: 0; color: #333; font-size: 0.97em; }
 .buffet-hinweis { font-size: 0.85em; color: #888; font-style: italic; margin: 0.8rem 0 0; }
+
+/* WhatsApp-Box */
+.whatsapp-box h2 { color: #25d366; }
+.whatsapp-box h2 i { margin-right: 6px; }
+.whatsapp-inner { display: flex; flex-direction: column; align-items: flex-start; gap: 1rem; margin-top: 0.8rem; }
+.whatsapp-qr { display: block; width: 160px; height: 160px; border-radius: 8px; }
+.whatsapp-btn { background-color: #25d366 !important; border-color: #25d366 !important; }
+.whatsapp-btn:hover { background-color: #1ebe5d !important; }
 .abend-spende { font-size: 0.95em; color: #444; margin-bottom: 0; }
 .abend-cta { margin-top: 1rem; font-style: italic; color: #0073b1; }
 .abend-upload-btn { display: inline-block; margin-top: 0.6rem; }
