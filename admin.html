@@ -6,27 +6,36 @@
   <title>Admin – Abi 2006</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background-color: #f3f2ef;
       color: #1c1e21;
+      font-size: 15px;
     }
 
     header {
       background-color: #0073b1;
       color: white;
-      padding: 1.5rem;
+      padding: 1.2rem 1rem;
       text-align: center;
     }
+    header h1 { margin: 0; font-size: 1.3rem; }
 
     .container {
-      max-width: 900px;
-      margin: 2rem auto;
+      max-width: 960px;
+      margin: 1.5rem auto;
       padding: 1rem;
+    }
+
+    .card {
       background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+      padding: 1.2rem;
+      margin-bottom: 1.5rem;
     }
 
     .hidden { display: none; }
@@ -36,76 +45,103 @@
     label {
       font-weight: bold;
       display: block;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
+      font-size: 0.9rem;
     }
 
-    input, textarea {
+    input[type="email"], input[type="password"], input[type="text"], textarea {
       width: 100%;
-      max-width: 500px;
-      padding: 0.5rem;
+      max-width: 420px;
+      padding: 0.55rem 0.7rem;
       border: 1px solid #ccc;
-      border-radius: 4px;
+      border-radius: 6px;
+      font-size: 0.95rem;
     }
 
-    button {
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       background-color: #0073b1;
       color: white;
       border: none;
-      padding: 10px 16px;
-      border-radius: 4px;
+      padding: 9px 16px;
+      border-radius: 6px;
       cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      white-space: nowrap;
     }
+    .btn:hover { background-color: #005f90; }
+    .btn-danger { background-color: #dc2626; }
+    .btn-danger:hover { background-color: #b91c1c; }
+    .btn-sm { padding: 5px 10px; font-size: 0.8rem; }
+    /* override legacy button styles inside tables */
+    button { background-color: #0073b1; color: white; border: none; padding: 9px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
     button:hover { background-color: #005f90; }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
+    h2 { margin: 0 0 1rem; font-size: 1.15rem; }
+    h3 { margin: 0 0 0.8rem; font-size: 1rem; color: #0073b1; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.4rem; }
+
+    /* ===== Tabellen ===== */
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 0.8rem; border-radius: 8px; border: 1px solid #e5e7eb; }
+
+    table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    th { background: #f8fafc; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: #6b7280; padding: 10px 12px; text-align: left; border-bottom: 1px solid #e5e7eb; white-space: nowrap; }
+    td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f9fafb; }
+
+    td .badge {
+      display: inline-block;
+      background: #e0f2fe;
+      color: #0369a1;
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
     }
 
-    th, td {
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
-      text-align: left;
+    td select {
+      padding: 4px 6px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 0.85rem;
+      cursor: pointer;
     }
-    th { background-color: #f0f0f0; }
 
-    .section { margin-top: 2rem; }
+    .section { margin-top: 0; }
+
+    .toolbar-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 0.8rem;
+    }
 
     .newsletter-controls {
       display: flex; flex-wrap: wrap; gap: 10px; margin-top: 1rem;
     }
-    @media (max-width: 600px) { .newsletter-controls { flex-direction: column; } }
+    .newsletter-controls input { max-width: 260px; }
 
-    /* ===== Mini-Rich-Text-Editor ===== */
-    .rte-wrap { border: 1px solid #ddd; border-radius: 10px; overflow: hidden; font: 14px/1.4 system-ui, sans-serif; max-width: 700px; }
+    /* ===== RTE ===== */
+    .rte-wrap { border: 1px solid #ddd; border-radius: 10px; overflow: hidden; font: 14px/1.4 system-ui, sans-serif; }
     .rte-toolbar { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; background: #f7f7f7; border-bottom: 1px solid #eee; }
-  /* Dunkelgraue Toolbar-Buttons */
-.rte-toolbar button{
-  background: #374151 !important;   /* dunkelgrau */
-  color: #ffffff !important;         /* weiße Labels/Icons */
-  border: 1px solid #374151;
-  border-radius: 8px;
-  padding: 6px 8px;
-  cursor: pointer;
-}
-.rte-toolbar button:hover{
-  background: #4B5563;               /* etwas heller beim Hover */
-  border-color: #4B5563;
-}
-.rte-toolbar button:active{
-  background: #111827;               /* gedrückt */
-  border-color: #111827;
-  transform: translateY(1px);
-}
-.rte-toolbar button b,
-.rte-toolbar button i,
-.rte-toolbar button u{
-  color: inherit;                     /* Symbole übernehmen Weiß */
-}
-
-    .rte-editor { min-height: 220px; padding: 12px; background: #fff; outline: none; }
+    .rte-toolbar button { background: #374151 !important; color: #fff !important; border: 1px solid #374151; border-radius: 6px; padding: 5px 8px; font-size: 0.82rem; }
+    .rte-toolbar button:hover { background: #4b5563 !important; }
+    .rte-toolbar button:active { background: #111827 !important; transform: translateY(1px); }
+    .rte-editor { min-height: 200px; padding: 12px; background: #fff; outline: none; }
     .rte-editor:empty:before { content: attr(data-placeholder); color: #999; }
+
+    @media (max-width: 600px) {
+      .container { padding: 0.6rem; }
+      .card { padding: 1rem 0.8rem; }
+      .newsletter-controls { flex-direction: column; }
+      .newsletter-controls input { max-width: 100%; }
+      input[type="email"], input[type="password"], input[type="text"] { max-width: 100%; }
+    }
   </style>
 </head>
 <body>
@@ -115,7 +151,9 @@
 </header>
 
 <div class="container">
-  <div id="loginSection">
+
+  <div id="loginSection" class="card" style="max-width:400px;margin:2rem auto;">
+    <h2>Login</h2>
     <div class="form-group">
       <label for="adminEmail">E-Mail</label>
       <input type="email" id="adminEmail" placeholder="Admin-E-Mail" />
@@ -125,63 +163,69 @@
       <input type="password" id="adminPassword" placeholder="Admin-Passwort" />
     </div>
     <button onclick="login()">Einloggen</button>
-    <p id="loginError" style="color: red; margin-top: 1rem;"></p>
+    <p id="loginError" style="color:red;margin-top:0.8rem;font-size:0.9rem;"></p>
   </div>
 
   <div id="adminSection" class="hidden">
-    <h2>Adminbereich</h2>
 
-    <div style="margin-bottom: 1rem;">
-      <button onclick="loadAdminData()">🔄 Aktualisieren</button>
-      <span id="spinner" class="hidden">⏳ Lädt...</span>
+    <div class="card">
+      <div class="toolbar-row">
+        <h2 style="margin:0;">Adminbereich</h2>
+        <button onclick="loadAdminData()">↺ Aktualisieren</button>
+        <span id="spinner" class="hidden" style="font-size:0.9rem;color:#666;">Lädt…</span>
+      </div>
     </div>
 
-    <div class="section">
+    <div class="card section">
       <h3>Offene Anmeldungen</h3>
-      <button onclick="freigabeMehrerer()">Mehrere freigeben</button>
-      <table id="offeneTabelle">
-        <thead>
-          <tr>
-            <th><input type="checkbox" id="checkAll" onclick="toggleAll(this)" /></th>
-            <th>Vorname</th>
-            <th>Nachname</th>
-            <th>E-Mail</th>
-            <th>Teilnehmer</th>
-            <th>Gäste</th>
-            <th>Kinder</th>
-            <th>Betrag</th>
-            <th>Löschen</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <div class="toolbar-row">
+        <button onclick="freigabeMehrerer()">Freigeben</button>
+      </div>
+      <div class="table-wrap">
+        <table id="offeneTabelle">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="checkAll" onclick="toggleAll(this)" /></th>
+              <th>Vorname</th>
+              <th>Nachname</th>
+              <th>E-Mail</th>
+              <th>TN</th>
+              <th>Gäste</th>
+              <th>Kinder</th>
+              <th>Betrag</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
 
-    <div class="section">
+    <div class="card section">
       <h3>Galerie-Zugänge</h3>
-      <table id="freigabeTabelle">
-        <thead>
-          <tr>
-            <th>Vorname</th>
-            <th>Nachname</th>
-            <th>E-Mail</th>
-            <th>Zugangscode</th>
-            <th>Teilnehmer</th>
-            <th>Gäste</th>
-            <th>Kinder</th>
-            <th>Betrag</th>
-            <th>Upload</th>
-            <th>Löschen</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <div class="table-wrap">
+        <table id="freigabeTabelle">
+          <thead>
+            <tr>
+              <th>Vorname</th>
+              <th>Nachname</th>
+              <th>E-Mail</th>
+              <th>Code</th>
+              <th>TN</th>
+              <th>Gäste</th>
+              <th>Kinder</th>
+              <th>Betrag</th>
+              <th>Upload</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
 
-    <div class="section">
+    <div class="card section">
       <h3>Newsletter schreiben</h3>
-
-      <!-- RICH-TEXT EDITOR statt Textarea -->
       <div class="form-group">
         <label>Nachricht</label>
         <div class="rte-wrap" id="newsletterEditor">
@@ -199,19 +243,19 @@
           <div id="rte"
                class="rte-editor"
                contenteditable="true"
-               data-placeholder="Hier deinen Newsletter-Text schreiben… Enter = neuer Absatz, Shift+Enter = Zeilenumbruch">
+               data-placeholder="Hier deinen Newsletter-Text schreiben…">
           </div>
         </div>
       </div>
-
       <div class="newsletter-controls">
-        <input type="text" id="newsletterSubject" placeholder="Betreff..." />
+        <input type="text" id="newsletterSubject" placeholder="Betreff…" />
         <input type="email" id="testEmail" placeholder="Test-E-Mail" />
         <button onclick="sendTest()">Test senden</button>
         <button onclick="sendNewsletter()">An alle senden</button>
       </div>
-      <p id="newsletterStatus" style="margin-top: 1rem;"></p>
+      <p id="newsletterStatus" style="margin-top:0.8rem;font-size:0.9rem;"></p>
     </div>
+
   </div>
 </div>
 
@@ -260,7 +304,7 @@
 	          <td>${row.gaeste || ""}</td>
 	          <td>${row.kinder || ""}</td>
 	          <td>${formatEuro(row.betrag)}</td>
-	          <td><button onclick="loeschen('${row.email}')">Löschen</button></td>
+	          <td><button onclick="loeschen('${row.email}')" style="background:#dc2626;padding:5px 10px;font-size:0.8rem;">✕</button></td>
         `;
         t1.appendChild(tr);
       });
@@ -272,7 +316,7 @@
           <td>${row.vorname}</td>
 	          <td>${row.nachname}</td>
 	          <td>${row.email}</td>
-	          <td>${row.code}</td>
+	          <td><span class="badge">${row.code}</span></td>
 	          <td>${row.teilnehmer || ""}</td>
 	          <td>${row.gaeste || ""}</td>
 	          <td>${row.kinder || ""}</td>
@@ -283,7 +327,7 @@
               <option value="nein" ${uploadValue === "nein" ? "selected" : ""}>Nein</option>
             </select>
           </td>
-          <td><button onclick="loeschen('${row.email}')">Löschen</button></td>
+          <td><button onclick="loeschen('${row.email}')" style="background:#dc2626;padding:5px 10px;font-size:0.8rem;">✕</button></td>
         `;
         t2.appendChild(tr);
       });
