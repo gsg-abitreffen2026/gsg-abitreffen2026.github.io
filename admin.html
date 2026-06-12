@@ -274,6 +274,7 @@
         <input type="email" id="testEmail" placeholder="Test-E-Mail" />
         <button onclick="sendTest()">Test senden</button>
         <button onclick="sendNewsletter()">An alle senden</button>
+        <button onclick="sendZahlungserinnerung()" style="background:#d97706;">Zahlungserinnerung</button>
       </div>
       <p id="newsletterStatus" style="margin-top:0.8rem;font-size:0.9rem;"></p>
     </div>
@@ -352,6 +353,8 @@
         const tr = document.createElement("tr");
         const uploadValue = (row.upload || "").toLowerCase() === "ja" ? "ja" : "nein";
         const bezahlt = (row.bezahlt || "") === "ja";
+        const hatBetrag = !!(row.betrag || "");
+        const showMarker = !bezahlt && hatBetrag;
         const bezahltBadge = bezahlt
           ? `<span class="badge badge-paid">✓ Ja</span>`
           : `<span class="badge badge-unpaid">Nein</span>`;
@@ -359,7 +362,7 @@
           ? ""
           : `<button onclick="zahlungBestaetigen('${row.email}')" style="background:#16a34a;padding:5px 10px;font-size:0.8rem;margin-left:6px;">✓</button>`;
         tr.innerHTML = `
-          <td>${row.vorname}</td>
+          <td>${showMarker ? `<span style="color:#dc2626;font-weight:700;margin-right:4px;">!</span>` : ""}${row.vorname}</td>
           <td>${row.nachname}</td>
           <td>${row.email}</td>
           <td><span class="badge">${row.code}</span></td>
@@ -592,6 +595,28 @@
 
     const result = await res.text();
     document.getElementById("newsletterStatus").textContent = result;
+  }
+
+  async function sendZahlungserinnerung() {
+    if (!confirm("Zahlungserinnerung an alle Personen senden, die noch nicht bezahlt haben?")) return;
+
+    const statusEl = document.getElementById("newsletterStatus");
+    statusEl.textContent = "Wird gesendet…";
+
+    const res = await fetch("https://gsg-proxy.vercel.app/api/proxy", {
+      method: "POST",
+      body: new URLSearchParams({
+        action: "zahlungserinnerung",
+        passwort: ADMIN_PASSWORD
+      })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      statusEl.textContent = `Erinnerung gesendet an ${data.count} Person${data.count !== 1 ? "en" : ""}.`;
+    } else {
+      statusEl.textContent = "Fehler: " + (data.message || "Unbekannt");
+    }
   }
 </script>
 
