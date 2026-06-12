@@ -70,7 +70,8 @@ function ensureGalerieHeaders(sheet) {
     "Teilnehmer",
     "Gäste",
     "Kinder 4-11",
-    "Betrag"
+    "Betrag",
+    "Bezahlt"
   ]);
 }
 
@@ -173,7 +174,8 @@ function getFreigegebeneUser() {
       teilnehmer: row[6] || "",
       gaeste: row[7] || "",
       kinder: row[8] || "",
-      betrag: row[9] || ""
+      betrag: row[9] || "",
+      bezahlt: (row[10] || "").toString().toLowerCase() === "ja" ? "ja" : "nein"
     }))
     .sort((a, b) => a.vorname.localeCompare(b.vorname));
 }
@@ -253,10 +255,12 @@ function doPost(e) {
           return testmailSenden(e);
         case "upload_set":
           return uploadSetzen(e);
+        case "zahlung_bestaetigen":
+          return zahlungBestaetigen(e);
         default:
           return jsonResponse({ success: false, message: "Unbekannte Aktion" });
       }
-    } else if (["freigeben", "loeschen", "newsletter_admin", "testmail", "upload_set"].includes(action)) {
+    } else if (["freigeben", "loeschen", "newsletter_admin", "testmail", "upload_set", "zahlung_bestaetigen"].includes(action)) {
       return jsonResponse({ success: false, message: "Falsches Passwort" });
     }
 
@@ -725,6 +729,40 @@ function galleryList() {
   return jsonResponse({ result: "success", images });
 }
 
+
+// ===== Zahlungseingang bestätigen (ADMIN) =====
+function zahlungBestaetigen(e) {
+  const email = (e.parameter.email || "").toLowerCase().trim();
+  if (!email) return jsonResponse({ success: false, message: "Missing email" });
+
+  const sheet = SpreadsheetApp.getActive().getSheetByName("Galerie");
+  if (!sheet) return jsonResponse({ success: false, message: "Sheet not found" });
+  ensureGalerieHeaders(sheet);
+
+  const rows = sheet.getDataRange().getValues();
+  for (let i = 1; i < rows.length; i++) {
+    const rowEmail = (rows[i][2] || "").toLowerCase().trim();
+    if (rowEmail === email) {
+      sheet.getRange(i + 1, 11).setValue("ja");
+
+      const vorname = (rows[i][0] || "").toString().trim();
+      const betrag = rows[i][9] || "";
+
+      MailApp.sendEmail({
+        to: email,
+        subject: "Zahlungseingang bestätigt – Klassentreffen 2026",
+        htmlBody: `Hallo ${vorname || ""},<br><br>
+          dein Zahlungseingang von <b>${betrag}&nbsp;€</b> wurde bestätigt. Du bist damit vollständig für das Klassentreffen am <b>11.07.2026</b> im <b>Wirtshaus Ratze</b> angemeldet.<br><br>
+          Wir freuen uns auf dich!<br><br>
+          Herzliche Grüße<br>Maxi`,
+        replyTo: ADMIN_EMAIL
+      });
+
+      return jsonResponse({ success: true });
+    }
+  }
+  return jsonResponse({ success: false, message: "Nutzer nicht gefunden" });
+}
 
 // ===== Hilfs-Tests =====
 function testDriveAuth() {

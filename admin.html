@@ -135,6 +135,16 @@
     .rte-editor { min-height: 200px; padding: 12px; background: #fff; outline: none; }
     .rte-editor:empty:before { content: attr(data-placeholder); color: #999; }
 
+    /* Stats */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-top: 0.5rem; }
+    .stat-box { background: #f0f7ff; border-radius: 8px; padding: 0.8rem 1rem; text-align: center; }
+    .stat-box .stat-val { font-size: 1.8rem; font-weight: 700; color: #0073b1; line-height: 1.1; }
+    .stat-box .stat-label { font-size: 0.78rem; color: #6b7280; margin-top: 2px; }
+    .badge-paid { background: #dcfce7; color: #16a34a; }
+    .badge-unpaid { background: #fee2e2; color: #dc2626; }
+    .btn-confirm { background: #16a34a; padding: 5px 10px; font-size: 0.8rem; }
+    .btn-confirm:hover { background: #15803d; }
+
     @media (max-width: 600px) {
       .container { padding: 0.6rem; }
       .card { padding: 1rem 0.8rem; }
@@ -201,6 +211,17 @@
       </div>
     </div>
 
+    <div class="card section" id="statsCard">
+      <h3>Übersicht</h3>
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-box"><div class="stat-val" id="statAngemeldet">–</div><div class="stat-label">Angemeldete</div></div>
+        <div class="stat-box"><div class="stat-val" id="statPersonen">–</div><div class="stat-label">Personen gesamt</div></div>
+        <div class="stat-box"><div class="stat-val" id="statBetrag">–</div><div class="stat-label">Erw. Betrag</div></div>
+        <div class="stat-box"><div class="stat-val" id="statBezahlt">–</div><div class="stat-label">Bezahlt</div></div>
+        <div class="stat-box"><div class="stat-val" id="statOffen">–</div><div class="stat-label">Ausstehend</div></div>
+      </div>
+    </div>
+
     <div class="card section">
       <h3>Galerie-Zugänge</h3>
       <div class="table-wrap">
@@ -215,6 +236,7 @@
               <th>Gäste</th>
               <th>Kinder</th>
               <th>Betrag</th>
+              <th>Bezahlt</th>
               <th>Upload</th>
               <th></th>
             </tr>
@@ -309,19 +331,44 @@
         t1.appendChild(tr);
       });
 
+      // Stats berechnen
+      let totalPersonen = 0, totalBetrag = 0, totalBezahlt = 0;
+      galerie.forEach(row => {
+        const tn = parseInt(row.teilnehmer) || 0;
+        const ga = parseInt(row.gaeste) || 0;
+        const ki = parseInt(row.kinder) || 0;
+        const bt = parseInt(row.betrag) || 0;
+        totalPersonen += tn + ga + ki;
+        totalBetrag += bt;
+        if ((row.bezahlt || "") === "ja") totalBezahlt += bt;
+      });
+      document.getElementById("statAngemeldet").textContent = galerie.length;
+      document.getElementById("statPersonen").textContent = totalPersonen;
+      document.getElementById("statBetrag").textContent = totalBetrag ? totalBetrag + " €" : "–";
+      document.getElementById("statBezahlt").textContent = totalBezahlt ? totalBezahlt + " €" : "–";
+      document.getElementById("statOffen").textContent = (totalBetrag - totalBezahlt) ? (totalBetrag - totalBezahlt) + " €" : "–";
+
       galerie.forEach(row => {
         const tr = document.createElement("tr");
         const uploadValue = (row.upload || "").toLowerCase() === "ja" ? "ja" : "nein";
+        const bezahlt = (row.bezahlt || "") === "ja";
+        const bezahltBadge = bezahlt
+          ? `<span class="badge badge-paid">✓ Ja</span>`
+          : `<span class="badge badge-unpaid">Nein</span>`;
+        const confirmBtn = bezahlt
+          ? ""
+          : `<button onclick="zahlungBestaetigen('${row.email}')" style="background:#16a34a;padding:5px 10px;font-size:0.8rem;margin-left:6px;">✓</button>`;
         tr.innerHTML = `
           <td>${row.vorname}</td>
-	          <td>${row.nachname}</td>
-	          <td>${row.email}</td>
-	          <td><span class="badge">${row.code}</span></td>
-	          <td>${row.teilnehmer || ""}</td>
-	          <td>${row.gaeste || ""}</td>
-	          <td>${row.kinder || ""}</td>
-	          <td>${formatEuro(row.betrag)}</td>
-	          <td>
+          <td>${row.nachname}</td>
+          <td>${row.email}</td>
+          <td><span class="badge">${row.code}</span></td>
+          <td>${row.teilnehmer || ""}</td>
+          <td>${row.gaeste || ""}</td>
+          <td>${row.kinder || ""}</td>
+          <td>${formatEuro(row.betrag)}</td>
+          <td style="white-space:nowrap">${bezahltBadge}${confirmBtn}</td>
+          <td>
             <select onchange="setUpload('${row.email}', this.value)">
               <option value="ja" ${uploadValue === "ja" ? "selected" : ""}>Ja</option>
               <option value="nein" ${uploadValue === "nein" ? "selected" : ""}>Nein</option>
@@ -383,6 +430,27 @@
 
     const result = await res.text();
     alert(result);
+    loadAdminData();
+  }
+
+  async function zahlungBestaetigen(email) {
+    if (!confirm(`Zahlungseingang für ${email} bestätigen und Bestätigungsmail senden?`)) return;
+
+    const res = await fetch("https://gsg-proxy.vercel.app/api/proxy", {
+      method: "POST",
+      body: new URLSearchParams({
+        action: "zahlung_bestaetigen",
+        passwort: ADMIN_PASSWORD,
+        email
+      })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      alert("Bestätigt! Bestätigungsmail wurde gesendet.");
+    } else {
+      alert("Fehler: " + (data.message || "Unbekannt"));
+    }
     loadAdminData();
   }
 
