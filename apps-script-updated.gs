@@ -799,30 +799,35 @@ function zahlungserinnerung(e) {
     });
   }
 
-  const unpaid = rows.filter(r => {
-    const email = (r[2] || "").toLowerCase().trim();
-    const betrag = r[9] || verbindlichMap[email] || "";
-    return (r[3] || "").toString().toLowerCase() === "ja" &&
-      betrag !== "" &&
-      (r[10] || "").toString().toLowerCase() !== "ja";
-  });
+  const unpaid = rows.filter(r =>
+    (r[3] || "").toString().toLowerCase() === "ja" &&
+    (r[10] || "").toString().toLowerCase() !== "ja"
+  );
 
   unpaid.forEach(r => {
     const email = (r[2] || "").toLowerCase().trim();
     const vorname = (r[0] || "").toString().trim();
     const betrag = r[9] || verbindlichMap[email] || "";
-    const paypalLink = `https://paypal.me/gsgabitreffen/${betrag}EUR`;
+    const paypalLink = betrag ? `https://paypal.me/gsgabitreffen/${betrag}EUR` : "";
 
-    MailApp.sendEmail({
-      to: email,
-      subject: "Erinnerung: Zahlung ausstehend – Klassentreffen 2026",
-      htmlBody: `Hallo ${vorname || ""},<br><br>
+    const body = betrag
+      ? `Hallo ${vorname || ""},<br><br>
         ich wollte kurz daran erinnern, dass deine Zahlung für das Klassentreffen am <b>11. Juli 2026</b> noch aussteht.<br><br>
         Bitte überweise den Betrag von <b>${betrag}&nbsp;€</b> bis zum <b>30. Juni 2026</b> über PayPal:<br>
         <a href="${paypalLink}">${paypalLink}</a><br><br>
         Bitte gib dabei deinen Namen an, falls dieser nicht aus deiner Mailadresse oder deinem PayPal-Namen erkennbar ist.<br><br>
         Falls du bereits bezahlt hast, ignoriere diese Mail bitte – dann dauert es nur noch einen Moment, bis ich es bestätigt habe.<br><br>
-        Herzliche Grüße<br>Maxi`,
+        Herzliche Grüße<br>Maxi`
+      : `Hallo ${vorname || ""},<br><br>
+        ich wollte kurz nachfragen, ob du am Klassentreffen am <b>11. Juli 2026</b> dabei bist und dich noch verbindlich anmelden möchtest.<br><br>
+        Falls ja, melde dich bitte noch verbindlich an – du bekommst dann direkt auch den Zahlungslink per Mail:<br>
+        <a href="https://gsg-abitreffen2026.github.io">gsg-abitreffen2026.github.io</a><br><br>
+        Herzliche Grüße<br>Maxi`;
+
+    MailApp.sendEmail({
+      to: email,
+      subject: "Erinnerung: Anmeldung & Zahlung – Klassentreffen 2026",
+      htmlBody: body,
       replyTo: ADMIN_EMAIL
     });
   });
