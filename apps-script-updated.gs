@@ -170,15 +170,11 @@ function getFreigegebeneUser() {
     vSheet.getDataRange().getValues().slice(1).forEach(r => {
       const email = (r[1] || "").toLowerCase().trim();
       if (!email) return;
-      const tn = Math.max(1, parseInt(r[4], 10) || 1);
-      const ga = parseInt(r[5], 10) || 0;
-      const ki = parseInt(r[6], 10) || 0;
-      const betrag = (parseInt(r[7], 10) || 0) || (tn * 50 + ga * 40 + ki * 25);
       verbindlichMap[email] = {
         teilnehmer: r[4] || "",
         gaeste: r[5] || "",
         kinder: r[6] || "",
-        betrag: betrag || ""
+        betrag: parseInt(r[7], 10) || ""
       };
     });
   }
@@ -187,18 +183,19 @@ function getFreigegebeneUser() {
     .filter(row => (row[3] || "").toString().toLowerCase() === "ja")
     .map(row => {
       const email = (row[2] || "").toLowerCase().trim();
-      const v = verbindlichMap[email] || {};
+      const v = verbindlichMap[email] || null;
       return {
         vorname: row[0] || "",
         nachname: row[1] || "",
         email: row[2],
         code: row[4] || "",
         upload: (row[5] || "").toString().toLowerCase() === "ja" ? "ja" : "nein",
-        teilnehmer: row[6] || v.teilnehmer || "",
-        gaeste: row[7] || v.gaeste || "",
-        kinder: row[8] || v.kinder || "",
-        betrag: row[9] || v.betrag || "",
-        bezahlt: (row[10] || "").toString().toLowerCase() === "ja" ? "ja" : "nein"
+        teilnehmer: row[6] || (v && v.teilnehmer) || "",
+        gaeste: row[7] || (v && v.gaeste) || "",
+        kinder: row[8] || (v && v.kinder) || "",
+        betrag: row[9] || (v && v.betrag) || "",
+        bezahlt: (row[10] || "").toString().toLowerCase() === "ja" ? "ja" : "nein",
+        verbindlich: !!v
       };
     })
     .sort((a, b) => a.vorname.localeCompare(b.vorname));

@@ -353,8 +353,7 @@
         const tr = document.createElement("tr");
         const uploadValue = (row.upload || "").toLowerCase() === "ja" ? "ja" : "nein";
         const bezahlt = (row.bezahlt || "") === "ja";
-        const hatBetrag = !!(row.betrag || "");
-        const showMarker = !bezahlt && hatBetrag;
+        const showMarker = row.verbindlich && !bezahlt;
         const bezahltBadge = bezahlt
           ? `<span class="badge badge-paid">✓ Ja</span>`
           : `<span class="badge badge-unpaid">Nein</span>`;
