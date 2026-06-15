@@ -169,11 +169,16 @@ function getFreigegebeneUser() {
   if (vSheet) {
     vSheet.getDataRange().getValues().slice(1).forEach(r => {
       const email = (r[1] || "").toLowerCase().trim();
-      if (email) verbindlichMap[email] = {
+      if (!email) return;
+      const tn = Math.max(1, parseInt(r[4], 10) || 1);
+      const ga = parseInt(r[5], 10) || 0;
+      const ki = parseInt(r[6], 10) || 0;
+      const betrag = (parseInt(r[7], 10) || 0) || (tn * 50 + ga * 40 + ki * 25);
+      verbindlichMap[email] = {
         teilnehmer: r[4] || "",
         gaeste: r[5] || "",
         kinder: r[6] || "",
-        betrag: r[7] || ""
+        betrag: betrag || ""
       };
     });
   }
@@ -278,6 +283,8 @@ function doPost(e) {
           return zahlungBestaetigen(e);
         case "zahlungserinnerung":
           return zahlungserinnerung(e);
+        case "debug_zahlungsdaten":
+          return debugZahlungsdaten(e);
         default:
           return jsonResponse({ success: false, message: "Unbekannte Aktion" });
       }
@@ -780,7 +787,15 @@ function zahlungserinnerung(e) {
   if (vSheet) {
     vSheet.getDataRange().getValues().slice(1).forEach(r => {
       const email = (r[1] || "").toLowerCase().trim();
-      if (email) verbindlichMap[email] = r[7] || "";
+      if (!email) return;
+      let betrag = parseInt(r[7], 10) || 0;
+      if (!betrag) {
+        const tn = Math.max(1, parseInt(r[4], 10) || 1);
+        const ga = parseInt(r[5], 10) || 0;
+        const ki = parseInt(r[6], 10) || 0;
+        betrag = tn * 50 + ga * 40 + ki * 25;
+      }
+      verbindlichMap[email] = betrag || "";
     });
   }
 
@@ -847,6 +862,46 @@ function zahlungBestaetigen(e) {
     }
   }
   return jsonResponse({ success: false, message: "Nutzer nicht gefunden" });
+}
+
+// ===== Debug: Zahlungsdaten prüfen (ADMIN) =====
+function debugZahlungsdaten(e) {
+  const galerieSheet = SpreadsheetApp.getActive().getSheetByName("Galerie");
+  if (!galerieSheet) return jsonResponse({ error: "Kein Galerie-Sheet" });
+  ensureGalerieHeaders(galerieSheet);
+
+  const rows = galerieSheet.getDataRange().getValues();
+  rows.shift();
+
+  const verbindlichMap = {};
+  const vSheet = SpreadsheetApp.getActive().getSheetByName("Verbindliche Anmeldungen");
+  if (vSheet) {
+    vSheet.getDataRange().getValues().slice(1).forEach(r => {
+      const email = (r[1] || "").toLowerCase().trim();
+      if (email) verbindlichMap[email] = r[7] || "";
+    });
+  }
+
+  const result = rows.map(r => {
+    const email = (r[2] || "").toLowerCase().trim();
+    const betragGalerie = r[9];
+    const betragVerbindlich = verbindlichMap[email];
+    const betragFinal = betragGalerie || betragVerbindlich || "";
+    return {
+      email,
+      freigegeben: (r[3] || "").toString(),
+      betragGalerie,
+      betragVerbindlich,
+      betragFinal,
+      bezahlt: (r[10] || "").toString()
+    };
+  });
+
+  return jsonResponse({
+    galerieZeilen: result.length,
+    verbindlichEintraege: Object.keys(verbindlichMap).length,
+    daten: result
+  });
 }
 
 // ===== Hilfs-Tests =====
