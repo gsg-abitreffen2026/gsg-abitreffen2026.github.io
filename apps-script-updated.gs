@@ -163,20 +163,39 @@ function getFreigegebeneUser() {
   ensureGalerieHeaders(sheet);
   const daten = sheet.getDataRange().getValues();
   daten.shift();
+
+  const verbindlichMap = {};
+  const vSheet = SpreadsheetApp.getActive().getSheetByName("Verbindliche Anmeldungen");
+  if (vSheet) {
+    vSheet.getDataRange().getValues().slice(1).forEach(r => {
+      const email = (r[1] || "").toLowerCase().trim();
+      if (email) verbindlichMap[email] = {
+        teilnehmer: r[4] || "",
+        gaeste: r[5] || "",
+        kinder: r[6] || "",
+        betrag: r[7] || ""
+      };
+    });
+  }
+
   return daten
     .filter(row => (row[3] || "").toString().toLowerCase() === "ja")
-    .map(row => ({
-      vorname: row[0] || "",
-      nachname: row[1] || "",
-      email: row[2],
-      code: row[4] || "",
-      upload: (row[5] || "").toString().toLowerCase() === "ja" ? "ja" : "nein",
-      teilnehmer: row[6] || "",
-      gaeste: row[7] || "",
-      kinder: row[8] || "",
-      betrag: row[9] || "",
-      bezahlt: (row[10] || "").toString().toLowerCase() === "ja" ? "ja" : "nein"
-    }))
+    .map(row => {
+      const email = (row[2] || "").toLowerCase().trim();
+      const v = verbindlichMap[email] || {};
+      return {
+        vorname: row[0] || "",
+        nachname: row[1] || "",
+        email: row[2],
+        code: row[4] || "",
+        upload: (row[5] || "").toString().toLowerCase() === "ja" ? "ja" : "nein",
+        teilnehmer: row[6] || v.teilnehmer || "",
+        gaeste: row[7] || v.gaeste || "",
+        kinder: row[8] || v.kinder || "",
+        betrag: row[9] || v.betrag || "",
+        bezahlt: (row[10] || "").toString().toLowerCase() === "ja" ? "ja" : "nein"
+      };
+    })
     .sort((a, b) => a.vorname.localeCompare(b.vorname));
 }
 
@@ -257,10 +276,12 @@ function doPost(e) {
           return uploadSetzen(e);
         case "zahlung_bestaetigen":
           return zahlungBestaetigen(e);
+        case "zahlungserinnerung":
+          return zahlungserinnerung(e);
         default:
           return jsonResponse({ success: false, message: "Unbekannte Aktion" });
       }
-    } else if (["freigeben", "loeschen", "newsletter_admin", "testmail", "upload_set", "zahlung_bestaetigen"].includes(action)) {
+    } else if (["freigeben", "loeschen", "newsletter_admin", "testmail", "upload_set", "zahlung_bestaetigen", "zahlungserinnerung"].includes(action)) {
       return jsonResponse({ success: false, message: "Falsches Passwort" });
     }
 
@@ -364,8 +385,23 @@ function handleVerbindlich(e) {
 
   if (galerieUser) {
     ensureGalerieHeaders(galerieUser.sheet);
+    const oldBetrag = parseInt(galerieUser.row[9] || 0, 10);
+    const wasBezahlt = (galerieUser.row[10] || "").toString().toLowerCase() === "ja";
     galerieUser.sheet.getRange(galerieUser.rowIndex, 7, 1, 4)
       .setValues([[teilnehmer, gaeste, kinder, betrag]]);
+    if (wasBezahlt && oldBetrag !== betrag) {
+      galerieUser.sheet.getRange(galerieUser.rowIndex, 11).setValue("nein");
+      MailApp.sendEmail({
+        to: ADMIN_EMAIL,
+        subject: `Geänderte Anmeldung – Zahlung offen: ${vorname} ${nachname}`,
+        htmlBody: `Hallo Maxi,<br><br>
+          <b>${vorname} ${nachname}</b> (${email}) hat seine/ihre Anmeldung geändert.<br><br>
+          Alter Betrag: <b>${oldBetrag}&nbsp;€</b><br>
+          Neuer Betrag: <b>${betrag}&nbsp;€</b><br><br>
+          Die Zahlung war als "bezahlt" markiert und wurde auf <b>offen</b> zurückgesetzt.<br><br>
+          Dein Abitreffen-System`
+      });
+    }
   }
 
   const paypalLink = `https://paypal.me/gsgabitreffen/${betrag}EUR`;
@@ -729,6 +765,55 @@ function galleryList() {
   return jsonResponse({ result: "success", images });
 }
 
+
+// ===== Zahlungserinnerung versenden (ADMIN) =====
+function zahlungserinnerung(e) {
+  const sheet = SpreadsheetApp.getActive().getSheetByName("Galerie");
+  if (!sheet) return jsonResponse({ success: false, message: "Sheet not found" });
+  ensureGalerieHeaders(sheet);
+
+  const rows = sheet.getDataRange().getValues();
+  rows.shift();
+
+  const verbindlichMap = {};
+  const vSheet = SpreadsheetApp.getActive().getSheetByName("Verbindliche Anmeldungen");
+  if (vSheet) {
+    vSheet.getDataRange().getValues().slice(1).forEach(r => {
+      const email = (r[1] || "").toLowerCase().trim();
+      if (email) verbindlichMap[email] = r[7] || "";
+    });
+  }
+
+  const unpaid = rows.filter(r => {
+    const email = (r[2] || "").toLowerCase().trim();
+    const betrag = r[9] || verbindlichMap[email] || "";
+    return (r[3] || "").toString().toLowerCase() === "ja" &&
+      betrag !== "" &&
+      (r[10] || "").toString().toLowerCase() !== "ja";
+  });
+
+  unpaid.forEach(r => {
+    const email = (r[2] || "").toLowerCase().trim();
+    const vorname = (r[0] || "").toString().trim();
+    const betrag = r[9] || verbindlichMap[email] || "";
+    const paypalLink = `https://paypal.me/gsgabitreffen/${betrag}EUR`;
+
+    MailApp.sendEmail({
+      to: email,
+      subject: "Erinnerung: Zahlung ausstehend – Klassentreffen 2026",
+      htmlBody: `Hallo ${vorname || ""},<br><br>
+        ich wollte kurz daran erinnern, dass deine Zahlung für das Klassentreffen am <b>11. Juli 2026</b> noch aussteht.<br><br>
+        Bitte überweise den Betrag von <b>${betrag}&nbsp;€</b> bis zum <b>30. Juni 2026</b> über PayPal:<br>
+        <a href="${paypalLink}">${paypalLink}</a><br><br>
+        Bitte gib dabei deinen Namen an, falls dieser nicht aus deiner Mailadresse oder deinem PayPal-Namen erkennbar ist.<br><br>
+        Falls du bereits bezahlt hast, ignoriere diese Mail bitte – dann dauert es nur noch einen Moment, bis ich es bestätigt habe.<br><br>
+        Herzliche Grüße<br>Maxi`,
+      replyTo: ADMIN_EMAIL
+    });
+  });
+
+  return jsonResponse({ success: true, count: unpaid.length });
+}
 
 // ===== Zahlungseingang bestätigen (ADMIN) =====
 function zahlungBestaetigen(e) {
