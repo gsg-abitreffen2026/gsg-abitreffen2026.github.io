@@ -810,18 +810,13 @@ function zahlungserinnerung(e) {
     const betrag = r[9] || verbindlichMap[email] || "";
     const paypalLink = betrag ? `https://paypal.me/gsgabitreffen/${betrag}EUR` : "";
 
-    const paypalDisplay = betrag
-      ? `https://paypal.me/gsgabitreffen/${betrag}EUR`
-      : `https://paypal.me/gsgabitreffen`;
-
     MailApp.sendEmail({
       to: email,
-      subject: "Erinnerung: Zahlung ausstehend – Klassentreffen 2026",
+      subject: "Erinnerung: Anmeldung & Zahlung – Klassentreffen 2026",
       htmlBody: `Hallo ${vorname || ""},<br><br>
-        ich wollte kurz daran erinnern, dass deine Zahlung für das Klassentreffen am <b>11. Juli 2026</b> noch aussteht.<br><br>
-        ${betrag ? `Bitte überweise den Betrag von <b>${betrag}&nbsp;€</b> bis zum <b>30. Juni 2026</b> über PayPal:` : `Bitte überweise deinen Beitrag bis zum <b>30. Juni 2026</b> über PayPal:`}<br>
-        <a href="${paypalDisplay}">${paypalDisplay}</a><br><br>
-        Bitte gib dabei deinen Namen an, falls dieser nicht aus deiner Mailadresse oder deinem PayPal-Namen erkennbar ist.<br><br>
+        ich wollte kurz daran erinnern, dass deine verbindliche Anmeldung oder Zahlung für das Klassentreffen am <b>11. Juli 2026</b> noch aussteht.<br><br>
+        Du kannst dich hier anmelden und den Zahlungslink abrufen:<br>
+        <a href="https://gsg-abitreffen2026.github.io">gsg-abitreffen2026.github.io</a><br><br>
         Falls du bereits bezahlt hast, ignoriere diese Mail bitte – dann dauert es nur noch einen Moment, bis ich es bestätigt habe.<br><br>
         Herzliche Grüße<br>Maxi`,
       replyTo: ADMIN_EMAIL
