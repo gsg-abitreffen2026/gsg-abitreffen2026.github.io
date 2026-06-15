@@ -816,7 +816,7 @@ function zahlungserinnerung(e) {
       htmlBody: `Hallo ${vorname || ""},<br><br>
         ich wollte kurz daran erinnern, dass deine verbindliche Anmeldung oder Zahlung für das Klassentreffen am <b>11. Juli 2026</b> noch aussteht.<br><br>
         Du kannst dich hier anmelden und den Zahlungslink abrufen:<br>
-        <a href="https://gsg-abitreffen2026.github.io">gsg-abitreffen2026.github.io</a><br><br>
+        <a href="https://gsg-abitreffen2026.github.io">https://gsg-abitreffen2026.github.io</a><br><br>
         Falls du bereits bezahlt hast, ignoriere diese Mail bitte – dann dauert es nur noch einen Moment, bis ich es bestätigt habe.<br><br>
         Herzliche Grüße<br>Maxi`,
       replyTo: ADMIN_EMAIL
