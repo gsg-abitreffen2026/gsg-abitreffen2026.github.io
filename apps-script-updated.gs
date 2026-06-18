@@ -608,20 +608,27 @@ function freigabeDurchführen(e) {
 function nutzerLoeschen(e) {
   const email = (e.parameter.email || "").toLowerCase().trim();
 
-  const sheets = [
-    SpreadsheetApp.getActive().getSheetByName("Anmeldungen"),
-    SpreadsheetApp.getActive().getSheetByName("Galerie")
-  ];
-
-  sheets.forEach(sheet => {
-    const rows = sheet.getDataRange().getValues();
+  // Anmeldungen: E-Mail in Spalte B (Index 1)
+  const anmeldungenSheet = SpreadsheetApp.getActive().getSheetByName("Anmeldungen");
+  if (anmeldungenSheet) {
+    const rows = anmeldungenSheet.getDataRange().getValues();
     for (let i = rows.length - 1; i >= 1; i--) {
-      const rowEmail = (rows[i][1] || rows[i][2] || "").toLowerCase();
-      if (rowEmail === email) {
-        sheet.deleteRow(i + 1);
+      if ((rows[i][1] || "").toString().toLowerCase().trim() === email) {
+        anmeldungenSheet.deleteRow(i + 1);
       }
     }
-  });
+  }
+
+  // Galerie: E-Mail in Spalte C (Index 2)
+  const galerieSheet = SpreadsheetApp.getActive().getSheetByName("Galerie");
+  if (galerieSheet) {
+    const rows = galerieSheet.getDataRange().getValues();
+    for (let i = rows.length - 1; i >= 1; i--) {
+      if ((rows[i][2] || "").toString().toLowerCase().trim() === email) {
+        galerieSheet.deleteRow(i + 1);
+      }
+    }
+  }
 
   return jsonResponse({ success: true });
 }
