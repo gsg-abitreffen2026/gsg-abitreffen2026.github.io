@@ -71,7 +71,8 @@ function ensureGalerieHeaders(sheet) {
     "Gäste",
     "Kinder 4-11",
     "Betrag",
-    "Bezahlt"
+    "Bezahlt",
+    "Pausiert"
   ]);
 }
 
@@ -195,7 +196,8 @@ function getFreigegebeneUser() {
         kinder: row[8] || (v && v.kinder) || "",
         betrag: row[9] || (v && v.betrag) || "",
         bezahlt: (row[10] || "").toString().toLowerCase() === "ja" ? "ja" : "nein",
-        verbindlich: !!v
+        verbindlich: !!v,
+        pausiert: (row[11] || "").toString().toLowerCase() === "ja" ? "ja" : "nein"
       };
     })
     .sort((a, b) => a.vorname.localeCompare(b.vorname));
@@ -280,6 +282,8 @@ function doPost(e) {
           return zahlungBestaetigen(e);
         case "zahlungserinnerung":
           return zahlungserinnerung(e);
+        case "pause_setzen":
+          return pauseSetzen(e);
         case "debug_zahlungsdaten":
           return debugZahlungsdaten(e);
         default:
@@ -654,6 +658,27 @@ function uploadSetzen(e) {
   return textResponse("not found");
 }
 
+// ===== Pausiert setzen (ADMIN) =====
+function pauseSetzen(e) {
+  const email = (e.parameter.email || "").toLowerCase().trim();
+  const value = (e.parameter.value || "").toLowerCase() === "ja" ? "ja" : "nein";
+
+  if (!email) return jsonResponse({ success: false, message: "Missing email" });
+
+  const sheet = SpreadsheetApp.getActive().getSheetByName("Galerie");
+  if (!sheet) return jsonResponse({ success: false, message: "Sheet not found" });
+  ensureGalerieHeaders(sheet);
+
+  const rows = sheet.getDataRange().getValues();
+  for (let i = 1; i < rows.length; i++) {
+    if ((rows[i][2] || "").toLowerCase().trim() === email) {
+      sheet.getRange(i + 1, 12).setValue(value);
+      return jsonResponse({ success: true });
+    }
+  }
+  return jsonResponse({ success: false, message: "Nutzer nicht gefunden" });
+}
+
 // ===== Newsletter versenden (ADMIN) =====
 function newsletterVersenden(e) {
   const betreff = e.parameter.subject || "Newsletter Abi 2006";
@@ -666,7 +691,10 @@ function newsletterVersenden(e) {
   rows.shift();
 
   const recipients = rows
-    .filter(r => (r[3] || "").toString().toLowerCase() === "ja")
+    .filter(r =>
+      (r[3] || "").toString().toLowerCase() === "ja" &&
+      (r[11] || "").toString().toLowerCase() !== "ja"
+    )
     .map(r => ({ email: r[2], vorname: r[0] }))
     .filter(r => r.email);
 
@@ -805,7 +833,8 @@ function zahlungserinnerung(e) {
 
   const unpaid = rows.filter(r =>
     (r[3] || "").toString().toLowerCase() === "ja" &&
-    (r[10] || "").toString().toLowerCase() !== "ja"
+    (r[10] || "").toString().toLowerCase() !== "ja" &&
+    (r[11] || "").toString().toLowerCase() !== "ja"
   );
 
   unpaid.forEach(r => {

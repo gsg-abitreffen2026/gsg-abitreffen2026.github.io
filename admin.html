@@ -142,8 +142,11 @@
     .stat-box .stat-label { font-size: 0.78rem; color: #6b7280; margin-top: 2px; }
     .badge-paid { background: #dcfce7; color: #16a34a; }
     .badge-unpaid { background: #fee2e2; color: #dc2626; }
+    .badge-paused { background: #fef3c7; color: #92400e; }
     .btn-confirm { background: #16a34a; padding: 5px 10px; font-size: 0.8rem; }
     .btn-confirm:hover { background: #15803d; }
+    .btn-warning { background: #d97706; }
+    .btn-warning:hover { background: #b45309; }
 
     @media (max-width: 600px) {
       .container { padding: 0.6rem; }
@@ -223,7 +226,10 @@
     </div>
 
     <div class="card section">
-      <h3>Galerie-Zugänge</h3>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:0.8rem;">
+        <h3 style="margin:0;">Galerie-Zugänge</h3>
+        <button onclick="exportKontakte()" style="background:#374151;padding:6px 12px;font-size:0.85rem;">⬇ Kontakte exportieren</button>
+      </div>
       <div class="table-wrap">
         <table id="freigabeTabelle">
           <thead>
@@ -237,6 +243,7 @@
               <th>Kinder</th>
               <th>Betrag</th>
               <th>Bezahlt</th>
+              <th>Pausiert</th>
               <th>Upload</th>
               <th></th>
             </tr>
@@ -353,6 +360,7 @@
         const tr = document.createElement("tr");
         const uploadValue = (row.upload || "").toLowerCase() === "ja" ? "ja" : "nein";
         const bezahlt = (row.bezahlt || "") === "ja";
+        const pausiert = (row.pausiert || "") === "ja";
         const showMarker = row.verbindlich && !bezahlt;
         const bezahltBadge = bezahlt
           ? `<span class="badge badge-paid">✓ Ja</span>`
@@ -360,6 +368,12 @@
         const confirmBtn = bezahlt
           ? ""
           : `<button onclick="zahlungBestaetigen('${row.email}')" style="background:#16a34a;padding:5px 10px;font-size:0.8rem;margin-left:6px;">✓</button>`;
+        const pauseBadge = pausiert
+          ? `<span class="badge badge-paused">Pausiert</span>`
+          : `<span class="badge" style="background:#f1f5f9;color:#64748b;">Aktiv</span>`;
+        const pauseBtn = pausiert
+          ? `<button onclick="setPause('${row.email}', 'nein')" style="background:#16a34a;padding:3px 7px;font-size:0.75rem;margin-left:4px;">↺</button>`
+          : `<button onclick="setPause('${row.email}', 'ja')" style="background:#d97706;padding:3px 7px;font-size:0.75rem;margin-left:4px;">⏸</button>`;
         tr.innerHTML = `
           <td>${showMarker ? `<span style="color:#dc2626;font-weight:700;margin-right:4px;">!</span>` : ""}${row.vorname}</td>
           <td>${row.nachname}</td>
@@ -370,6 +384,7 @@
           <td>${row.kinder || ""}</td>
           <td>${formatEuro(row.betrag)}</td>
           <td style="white-space:nowrap">${bezahltBadge}${confirmBtn}</td>
+          <td style="white-space:nowrap">${pauseBadge}${pauseBtn}</td>
           <td>
             <select onchange="setUpload('${row.email}', this.value)">
               <option value="ja" ${uploadValue === "ja" ? "selected" : ""}>Ja</option>
@@ -453,6 +468,16 @@
     } else {
       alert("Fehler: " + (data.message || "Unbekannt"));
     }
+    loadAdminData();
+  }
+
+  async function setPause(email, value) {
+    const res = await fetch("https://gsg-proxy.vercel.app/api/proxy", {
+      method: "POST",
+      body: new URLSearchParams({ action: "pause_setzen", passwort: ADMIN_PASSWORD, email, value })
+    });
+    const data = await res.json();
+    if (!data.success) alert("Fehler: " + (data.message || "Unbekannt"));
     loadAdminData();
   }
 
@@ -594,6 +619,33 @@
 
     const result = await res.text();
     document.getElementById("newsletterStatus").textContent = result;
+  }
+
+  function exportKontakte() {
+    const rows = Array.from(document.querySelectorAll("#freigabeTabelle tbody tr"));
+    const headers = ["Vorname", "Nachname", "E-Mail", "Teilnehmer", "Gäste", "Kinder", "Betrag", "Bezahlt", "Pausiert"];
+    const csvRows = [headers.join(";")];
+    rows.forEach(tr => {
+      const cells = tr.querySelectorAll("td");
+      // Strip HTML (badges, buttons) from cells – take textContent
+      const vorname = cells[0].textContent.replace("!", "").trim();
+      const nachname = cells[1].textContent.trim();
+      const email = cells[2].textContent.trim();
+      const tn = cells[4].textContent.trim();
+      const gaeste = cells[5].textContent.trim();
+      const kinder = cells[6].textContent.trim();
+      const betrag = cells[7].textContent.trim();
+      const bezahlt = cells[8].textContent.includes("Ja") ? "ja" : "nein";
+      const pausiert = cells[9].textContent.includes("Pausiert") ? "ja" : "nein";
+      csvRows.push([vorname, nachname, email, tn, gaeste, kinder, betrag, bezahlt, pausiert].map(v => `"${v}"`).join(";"));
+    });
+    const blob = new Blob(["﻿" + csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "kontakte-abitreffen2026.csv";
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   async function sendZahlungserinnerung() {
