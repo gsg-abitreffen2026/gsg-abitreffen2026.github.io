@@ -123,11 +123,19 @@ document.addEventListener("DOMContentLoaded", () => {
     setNewsletterNavVisible(!hasNewsletter);
   }
   function updateVerbindlichStatus() {
-    const hasNewsletter = !!localStorage.getItem("newsletterVorname") || localStorage.getItem("loggedIn") === "true";
-    const shouldShow = hasNewsletter;
+    const anmeldungGeschlossen = document.getElementById("anmeldung-geschlossen");
+    const anmeldungAbgelaufen = new Date() >= new Date("2026-07-01T00:00:00");
 
-    verbindlichSection?.classList.toggle("hidden", !shouldShow);
-    if (!shouldShow) return;
+    if (anmeldungAbgelaufen) {
+      verbindlichSection?.classList.add("hidden");
+      anmeldungGeschlossen?.classList.remove("hidden");
+      return;
+    }
+
+    anmeldungGeschlossen?.classList.add("hidden");
+    const hasNewsletter = !!localStorage.getItem("newsletterVorname") || localStorage.getItem("loggedIn") === "true";
+    verbindlichSection?.classList.toggle("hidden", !hasNewsletter);
+    if (!hasNewsletter) return;
 
     const storedVorname = localStorage.getItem("newsletterVorname") || "";
     const storedNachname = localStorage.getItem("newsletterNachname") || "";
