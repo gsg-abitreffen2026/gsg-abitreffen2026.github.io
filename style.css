@@ -249,6 +249,12 @@ aside.right-column .content-box { padding-left: 12px; padding-right: 12px; }
 .buffet-gang { margin: 0; color: #333; font-size: 0.97em; }
 .buffet-hinweis { font-size: 0.85em; color: #888; font-style: italic; margin: 0.8rem 0 0; }
 
+/* Danke-Box */
+#danke-box { border-left: 4px solid #0073b1; background: #f0f7ff; }
+#danke-box h2 { color: #0073b1; }
+.danke-links { list-style: none; padding: 0; margin: 1.2rem 0 0; display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.danke-btn { display: inline-block; font-size: 0.95em; }
+
 /* WhatsApp-Box */
 .whatsapp-box h2 { color: #25d366; }
 .whatsapp-box h2 i { margin-right: 6px; }

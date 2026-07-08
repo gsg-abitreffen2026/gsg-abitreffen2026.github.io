@@ -188,6 +188,13 @@ document.addEventListener("DOMContentLoaded", () => {
       updateVerbindlichStatus();
     });
   }
+  function updateDankeBox() {
+    const dankeBox = document.getElementById("danke-box");
+    if (!dankeBox) return;
+    const dankeAb = new Date() >= new Date("2026-07-11T18:00:00Z"); // 20:00 CEST
+    dankeBox.classList.toggle("hidden", !dankeAb);
+  }
+
   function updateUploadStatus() {
     const loggedIn = localStorage.getItem("loggedIn") === "true";
     const bezahlt = localStorage.getItem("bezahlt") === "true";
@@ -442,6 +449,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     updateVerbindlichStatus();
     updateUploadStatus();
+    updateDankeBox();
   }
 
   // ===== Newsletter-Formular (robust, ohne Dopplung!) =====
