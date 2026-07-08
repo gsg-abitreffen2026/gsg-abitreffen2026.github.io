@@ -496,10 +496,12 @@ function handleLogin(e) {
     const name = rows[i][1] || "";
 
     if (email === rowEmail && code === rowCode && freigabe === "ja") {
+      const bezahlt = (rows[i][10] || "").toString().toLowerCase() === "ja";
       return jsonResponse({
         result: "success",
         name: name,
-        upload: upload === "ja"
+        upload: upload === "ja",
+        bezahlt: bezahlt
       });
     }
   }

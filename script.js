@@ -190,8 +190,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   function updateUploadStatus() {
     const loggedIn = localStorage.getItem("loggedIn") === "true";
-    const uploadAllowed = localStorage.getItem("uploadAllowed") === "true";
-    uploadBox?.classList.toggle("hidden", !(loggedIn && uploadAllowed));
+    const bezahlt = localStorage.getItem("bezahlt") === "true";
+    const uploadOpen = new Date() >= new Date("2026-07-11T13:00:00Z"); // 15:00 CEST
+    uploadBox?.classList.toggle("hidden", !(loggedIn && bezahlt && uploadOpen));
   }
 
   function setupPaymentFlow() {
@@ -707,6 +708,7 @@ document.addEventListener("DOMContentLoaded", () => {
           localStorage.setItem("loggedIn", "true");
           localStorage.setItem("subscriberName", data.name || "");
           localStorage.setItem("uploadAllowed", data.upload ? "true" : "false");
+          localStorage.setItem("bezahlt", data.bezahlt ? "true" : "false");
           localStorage.setItem("loginEmail", email);
           localStorage.setItem("loginCode", code);
           verbindlichChecked = false;
