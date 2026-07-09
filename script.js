@@ -58,15 +58,27 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateCountdown() {
     const now = new Date().getTime();
     const diff = countdownDate - now;
-    const days = Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
-    const text = diff < 0 ? "Es ist so weit!" : `Noch ${days} Tage!`;
+    let text;
+    if (diff < 0) {
+      text = "Es ist so weit!";
+    } else {
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      if (days >= 1) {
+        text = `Noch ${days} ${days === 1 ? "Tag" : "Tage"}!`;
+      } else {
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        text = `Noch ${hours} Std. ${minutes} Min.!`;
+      }
+    }
     countdownEls.forEach(el => el.textContent = text);
     if (abendCountdownEl) {
-      abendCountdownEl.textContent = diff < 0 ? "es ist soweit" : `${days} Tagen`;
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      abendCountdownEl.textContent = diff < 0 ? "es ist soweit" : days >= 1 ? `${days} ${days === 1 ? "Tag" : "Tagen"}` : "weniger als einem Tag";
     }
   }
   updateCountdown();
-  setInterval(updateCountdown, 1000 * 60 * 60);
+  setInterval(updateCountdown, 1000 * 60);
 
   // ===== Login/Newsletter Status =====
   const newsletterBox = document.getElementById("newsletter");
