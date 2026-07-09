@@ -123,6 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setNewsletterNavVisible(!hasNewsletter);
   }
   function updateVerbindlichStatus() {
+    if (isNachEvent()) return;
     const anmeldungGeschlossen = document.getElementById("anmeldung-geschlossen");
     const anmeldungAbgelaufen = new Date() >= new Date("2026-07-01T00:00:00");
 
@@ -188,11 +189,39 @@ document.addEventListener("DOMContentLoaded", () => {
       updateVerbindlichStatus();
     });
   }
-  function updateDankeBox() {
-    const dankeBox = document.getElementById("danke-box");
-    if (!dankeBox) return;
-    const dankeAb = new Date() >= new Date("2026-07-11T18:00:00Z"); // 20:00 CEST
-    dankeBox.classList.toggle("hidden", !dankeAb);
+  const NACH_EVENT_AB = new Date("2026-07-11T16:30:00Z"); // 18:30 CEST
+
+  function isNachEvent() {
+    return new Date() >= NACH_EVENT_AB;
+  }
+
+  function applyNachEventLayout(loggedIn) {
+    // Danke-Box immer zeigen
+    document.getElementById("danke-box")?.classList.remove("hidden");
+
+    // Alles außer Galerie, Danke-Box, WhatsApp, Kontakt ausblenden
+    document.getElementById("abend-infos")?.classList.add("hidden");
+    document.getElementById("anmeldung-geschlossen")?.classList.add("hidden");
+    verbindlichSection?.classList.add("hidden");
+    newsletterBox?.classList.add("hidden");
+
+    // Nav-Items ausblenden
+    document.getElementById("nav-abend-item")?.classList.add("hidden");
+    document.getElementById("nav-verbindlich-item")?.classList.add("hidden");
+    navNewsletterItem?.classList.add("hidden");
+    document.getElementById("mobile-nav-abend")?.classList.add("hidden");
+    document.getElementById("mobile-nav-verbindlich")?.classList.add("hidden");
+    mobileNavNewsletter?.classList.add("hidden");
+
+    if (loggedIn) {
+      galerieLoginBox?.classList.add("hidden");
+      galerieLoginMitte?.classList.add("hidden");
+      galerieSection?.classList.remove("hidden");
+    } else {
+      galerieLoginBox?.classList.remove("hidden");
+      galerieLoginMitte?.classList.remove("hidden");
+      galerieSection?.classList.add("hidden");
+    }
   }
 
   function updateUploadStatus() {
@@ -440,7 +469,16 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function checkLoginNewsletterStatus() {
-    if (localStorage.getItem("loggedIn") === "true") {
+    const loggedIn = localStorage.getItem("loggedIn") === "true";
+
+    if (isNachEvent()) {
+      applyNachEventLayout(loggedIn);
+      if (loggedIn) loadGalleryList();
+      updateUploadStatus();
+      return;
+    }
+
+    if (loggedIn) {
       showGalerie();
       loadGalleryList();
       refreshVerbindlichStatus();
@@ -449,7 +487,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     updateVerbindlichStatus();
     updateUploadStatus();
-    updateDankeBox();
   }
 
   // ===== Newsletter-Formular (robust, ohne Dopplung!) =====
