@@ -254,8 +254,10 @@ aside.right-column .content-box { padding-left: 12px; padding-right: 12px; }
 #danke-box h2 { color: #0073b1; }
 .danke-links { list-style: none; padding: 0; margin: 1.2rem 0 0; display: flex; flex-direction: column; gap: 0.75rem; align-items: center; width: 100%; }
 .danke-btn { display: inline-block; font-size: 0.95em; min-width: 200px; text-align: center; }
-.danke-song-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
-.danke-song-label { font-weight: 600; font-size: 0.95em; }
+.danke-song-row { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; }
+.danke-btn-song { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.danke-btn-title { font-weight: 600; }
+.danke-btn-sub { font-size: 0.8em; opacity: 0.85; }
 
 /* WhatsApp-Box */
 .whatsapp-box h2 { color: #25d366; }
