@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ===== Countdown =====
-  const countdownDate = new Date("2026-07-11T00:00:00").getTime();
+  const countdownDate = new Date("2026-07-11T15:00:00Z").getTime(); // 17:00 CEST
   const countdownEls = document.querySelectorAll("#countdown, #countdown-box");
   const abendCountdownEl = document.getElementById("abend-countdown");
   function updateCountdown() {
