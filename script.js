@@ -238,9 +238,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function updateUploadStatus() {
     const loggedIn = localStorage.getItem("loggedIn") === "true";
+    const uploadAllowed = localStorage.getItem("uploadAllowed") === "true";
     const bezahlt = localStorage.getItem("bezahlt") === "true";
     const uploadOpen = new Date() >= new Date("2026-07-11T13:00:00Z"); // 15:00 CEST
-    uploadBox?.classList.toggle("hidden", !(loggedIn && bezahlt && uploadOpen));
+    const canUpload = loggedIn && (uploadAllowed || (bezahlt && uploadOpen));
+    uploadBox?.classList.toggle("hidden", !canUpload);
   }
 
   function setupPaymentFlow() {
