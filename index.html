@@ -206,17 +206,18 @@
           <a class="button" href="galerie.html">Alle Bilder ansehen</a>
         </div>
         <p id="gallery-status" class="form-status"></p>
-      </section>
 
-      <section id="upload-box" class="content-box hidden">
-        <h2>Galerie-Upload</h2>
-        <p>Hier kannst du Bilder direkt in die Galerie hochladen.</p>
-        <form id="upload-form">
-          <input type="file" id="upload-file" accept="image/jpeg,image/png,image/heic,image/heif" required />
-          <p class="form-hint">Erlaubte Formate: JPG, PNG, HEIC/HEIF - Max 5 MB</p>
-          <button type="submit" class="button">Bild hochladen</button>
-        </form>
-        <p id="upload-status" class="form-status"></p>
+        <div id="upload-box" class="hidden">
+          <div class="upload-divider"></div>
+          <h3>Bild hochladen</h3>
+          <p>Hier kannst du Bilder direkt in die Galerie hochladen.</p>
+          <form id="upload-form">
+            <input type="file" id="upload-file" accept="image/jpeg,image/png,image/heic,image/heif" required />
+            <p class="form-hint">Erlaubte Formate: JPG, PNG, HEIC/HEIF - Max 5 MB</p>
+            <button type="submit" class="button">Bild hochladen</button>
+          </form>
+          <p id="upload-status" class="form-status"></p>
+        </div>
       </section>
 
       <section id="whatsapp" class="content-box whatsapp-box">

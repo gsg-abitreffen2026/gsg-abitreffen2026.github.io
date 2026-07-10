@@ -249,6 +249,10 @@ aside.right-column .content-box { padding-left: 12px; padding-right: 12px; }
 .buffet-gang { margin: 0; color: #333; font-size: 0.97em; }
 .buffet-hinweis { font-size: 0.85em; color: #888; font-style: italic; margin: 0.8rem 0 0; }
 
+/* Upload innerhalb Galerie */
+.upload-divider { border: none; border-top: 1px solid #e0e0e0; margin: 1.4rem 0 1rem; width: 100%; }
+#upload-box h3 { margin-top: 0; }
+
 /* Danke-Box */
 #danke-box { border-left: 4px solid #0073b1; background: #f0f7ff; }
 #danke-box h2 { color: #0073b1; }
