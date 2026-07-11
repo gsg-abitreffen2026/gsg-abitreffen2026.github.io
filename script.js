@@ -640,7 +640,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   // ===== Upload (Galerie) =====
-  const MAX_UPLOAD_SIZE = 5 * 1024 * 1024;
+  const MAX_UPLOAD_SIZE = 20 * 1024 * 1024;
   const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/heic", "image/heif", "image/jpg"];
   const ALLOWED_EXT = [".jpg", ".jpeg", ".png", ".heic", ".heif"];
 
@@ -676,7 +676,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       if (file.size > MAX_UPLOAD_SIZE) {
-        setUploadMessage("Datei zu groß. Maximal 5 MB.", "red");
+        setUploadMessage("Datei zu groß. Maximal 20 MB.", "red");
         if (submitBtn) submitBtn.disabled = false;
         return;
       }
