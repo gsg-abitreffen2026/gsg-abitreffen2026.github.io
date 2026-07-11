@@ -2,7 +2,7 @@ const ADMIN_PASSWORT = "wallnuss26";
 const ADMIN_EMAIL = "maximilian.junghanss@me.com";
 
 const UPLOAD_FOLDER_NAME = "Abitreffen";
-const MAX_UPLOAD_SIZE = 5 * 1024 * 1024;
+const MAX_UPLOAD_SIZE = 20 * 1024 * 1024;
 const ALLOWED_UPLOAD_TYPES = ["image/jpeg", "image/png", "image/heic", "image/heif", "image/jpg"];
 
 // ===== Helpers =====

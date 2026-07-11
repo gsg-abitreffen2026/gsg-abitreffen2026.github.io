@@ -640,6 +640,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   // ===== Upload (Galerie) =====
+  function compressImage(file, quality, maxDim) {
+    return new Promise(function (resolve, reject) {
+      const reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = function (e) {
+        const img = new Image();
+        img.onerror = reject;
+        img.onload = function () {
+          let w = img.naturalWidth, h = img.naturalHeight;
+          if (w > maxDim || h > maxDim) {
+            if (w >= h) { h = Math.round(h * maxDim / w); w = maxDim; }
+            else { w = Math.round(w * maxDim / h); h = maxDim; }
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = w; canvas.height = h;
+          canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL("image/jpeg", quality);
+          resolve(dataUrl.split(",")[1]);
+        };
+        img.src = String(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
   const MAX_UPLOAD_SIZE = 20 * 1024 * 1024;
   const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/heic", "image/heif", "image/jpg"];
   const ALLOWED_EXT = [".jpg", ".jpeg", ".png", ".heic", ".heif"];
@@ -689,21 +714,18 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      setUploadMessage("Upload läuft...", "#0073b1");
+      setUploadMessage("Bild wird vorbereitet...", "#0073b1");
 
-      const reader = new FileReader();
-      reader.onload = function () {
-        const result = String(reader.result || "");
-        const base64 = result.includes(",") ? result.split(",")[1] : result;
-
+      compressImage(file, 0.85, 2000).then(function (base64) {
+        setUploadMessage("Upload läuft...", "#0073b1");
         fetch("https://gsg-proxy.vercel.app/api/proxy", {
           method: "POST",
           body: new URLSearchParams({
             action: "upload_image",
             email: loginEmail,
             code: loginCode,
-            filename: file.name,
-            mimeType: file.type || "",
+            filename: file.name.replace(/\.[^.]+$/, "") + ".jpg",
+            mimeType: "image/jpeg",
             data: base64
           })
         })
@@ -732,14 +754,11 @@ document.addEventListener("DOMContentLoaded", () => {
         .finally(() => {
           if (submitBtn) submitBtn.disabled = false;
         });
-      };
-
-      reader.onerror = function () {
-        setUploadMessage("Datei konnte nicht gelesen werden.", "red");
+      }).catch(function (err) {
+        console.error("Komprimierung fehlgeschlagen:", err);
+        setUploadMessage("Bild konnte nicht verarbeitet werden.", "red");
         if (submitBtn) submitBtn.disabled = false;
-      };
-
-      reader.readAsDataURL(file);
+      });
     });
   }
 
