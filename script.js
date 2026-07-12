@@ -689,19 +689,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const submitBtn = uploadForm.querySelector("button[type='submit']");
       if (submitBtn) submitBtn.disabled = true;
 
-      const file = uploadFile?.files?.[0];
-      if (!file) {
-        setUploadMessage("Bitte wähle eine Datei aus.", "red");
-        if (submitBtn) submitBtn.disabled = false;
-        return;
-      }
-      if (!isAllowedImage(file)) {
-        setUploadMessage("Dateiformat nicht erlaubt. Bitte JPG, PNG oder HEIC/HEIF verwenden.", "red");
-        if (submitBtn) submitBtn.disabled = false;
-        return;
-      }
-      if (file.size > MAX_UPLOAD_SIZE) {
-        setUploadMessage("Datei zu groß. Maximal 20 MB.", "red");
+      const files = Array.from(uploadFile?.files || []);
+      if (!files.length) {
+        setUploadMessage("Bitte wähle mindestens eine Datei aus.", "red");
         if (submitBtn) submitBtn.disabled = false;
         return;
       }
@@ -714,51 +704,64 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      setUploadMessage("Bild wird vorbereitet...", "#0073b1");
-
-      compressImage(file, 0.85, 2000).then(function (base64) {
-        setUploadMessage("Upload läuft...", "#0073b1");
-        fetch("https://gsg-proxy.vercel.app/api/proxy", {
-          method: "POST",
-          body: new URLSearchParams({
-            action: "upload_image",
-            email: loginEmail,
-            code: loginCode,
-            filename: file.name.replace(/\.[^.]+$/, "") + ".jpg",
-            mimeType: "image/jpeg",
-            data: base64
-          })
-        })
-        .then(async response => {
-          const text = await response.text();
-          try { return JSON.parse(text); }
-          catch (err) {
-            setUploadMessage("Upload fehlgeschlagen (Serverantwort ist kein JSON).", "red");
-            console.error("Upload-Response:", text.slice(0, 200));
-            throw err;
-          }
-        })
-        .then(data => {
-          if (data.result === "success" || data.success === true) {
-            setUploadMessage("Danke! Bild wurde hochgeladen.", "green");
-            uploadForm.reset();
-            loadGalleryList(true);
-          } else {
-            setUploadMessage(data.message || "Upload fehlgeschlagen.", "red");
-          }
-        })
-        .catch(err => {
-          console.error("Upload-Fehler:", err);
-          setUploadMessage("Upload fehlgeschlagen.", "red");
-        })
-        .finally(() => {
-          if (submitBtn) submitBtn.disabled = false;
-        });
-      }).catch(function (err) {
-        console.error("Komprimierung fehlgeschlagen:", err);
-        setUploadMessage("Bild konnte nicht verarbeitet werden.", "red");
+      const invalid = files.filter(f => !isAllowedImage(f));
+      if (invalid.length) {
+        setUploadMessage("Ungültiges Format: " + invalid.map(f => f.name).join(", "), "red");
         if (submitBtn) submitBtn.disabled = false;
-      });
+        return;
+      }
+      const tooBig = files.filter(f => f.size > MAX_UPLOAD_SIZE);
+      if (tooBig.length) {
+        setUploadMessage("Zu groß (max. 20 MB): " + tooBig.map(f => f.name).join(", "), "red");
+        if (submitBtn) submitBtn.disabled = false;
+        return;
+      }
+
+      let done = 0, errors = 0;
+
+      function uploadNext(index) {
+        if (index >= files.length) {
+          uploadForm.reset();
+          loadGalleryList(true);
+          if (errors === 0) {
+            setUploadMessage("Alle " + done + " Bilder hochgeladen.", "green");
+          } else {
+            setUploadMessage(done + " hochgeladen, " + errors + " fehlgeschlagen.", "red");
+          }
+          if (submitBtn) submitBtn.disabled = false;
+          return;
+        }
+        const file = files[index];
+        setUploadMessage("Bild " + (index + 1) + " von " + files.length + " wird hochgeladen...", "#0073b1");
+
+        compressImage(file, 0.85, 2000).then(function (base64) {
+          return fetch("https://gsg-proxy.vercel.app/api/proxy", {
+            method: "POST",
+            body: new URLSearchParams({
+              action: "upload_image",
+              email: loginEmail,
+              code: loginCode,
+              filename: file.name.replace(/\.[^.]+$/, "") + ".jpg",
+              mimeType: "image/jpeg",
+              data: base64
+            })
+          }).then(async response => {
+            const text = await response.text();
+            try { return JSON.parse(text); }
+            catch (err) { console.error("Upload-Response:", text.slice(0, 200)); throw err; }
+          }).then(data => {
+            if (data.result === "success" || data.success === true) { done++; }
+            else { errors++; console.error("Upload fehlgeschlagen:", file.name, data.message); }
+          });
+        }).catch(function (err) {
+          errors++;
+          console.error("Fehler bei", file.name, err);
+        }).finally(function () {
+          uploadNext(index + 1);
+        });
+      }
+
+      uploadNext(0);
     });
   }
 
